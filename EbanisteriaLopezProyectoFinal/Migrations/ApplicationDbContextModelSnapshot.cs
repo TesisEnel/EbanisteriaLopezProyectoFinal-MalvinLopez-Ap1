@@ -98,6 +98,10 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<DateTime>("FechaPublicacion")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<byte[]>("Imagen")
+                        .IsRequired()
+                        .HasColumnType("bytea");
+
                     b.Property<string>("Moneda")
                         .IsRequired()
                         .HasColumnType("text");

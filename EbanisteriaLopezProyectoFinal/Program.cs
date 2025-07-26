@@ -1,6 +1,8 @@
 
+using Blazored.Toast;
 using EbanisteriaLopezProyectoFinal.Components;
 using EbanisteriaLopezProyectoFinal.Components.Account;
+using EbanisteriaLopezProyectoFinal.Components.Services;
 using EbanisteriaLopezProyectoFinal.Data;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -37,7 +39,16 @@ builder.Services.AddIdentityCore<ApplicationUser>(options => options.SignIn.Requ
 
 builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
 
+builder.Services.AddScoped<ProductoServices>();
+builder.Services.AddScoped<IContactoService, ContactoService>();
 
+builder.Services.AddScoped<CategoriaServices>();
+
+builder.Services.AddScoped<CarritoService>();
+
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddBlazoredToast();
 
 var app = builder.Build();
 
@@ -57,6 +68,10 @@ app.UseHttpsRedirection();
 
 
 app.UseAntiforgery();
+
+app.UseAuthentication();
+
+app.UseAuthorization();
 
 app.MapStaticAssets();
 app.MapRazorComponents<App>()

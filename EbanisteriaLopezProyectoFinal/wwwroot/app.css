@@ -13,7 +13,7 @@ a, .btn-link {
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {
@@ -58,3 +58,248 @@ h1:focus {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Smooth transition for navigation links */
+.nav-link {
+    transition: color 0.3s ease-in-out;
+}
+
+    .nav-link.hover-primary:hover {
+        color: var(--bs-primary) !important; /* Ensure --bs-primary is defined or use a specific color like #FFD700 for a primary yellow */
+    }
+
+/* Smooth transition for project items on hover */
+.project-item img {
+    transition: transform 0.5s ease-in-out;
+}
+
+.project-item:hover img {
+    transform: scale(1.05); /* Slightly zoom in the image on hover */
+}
+
+.project-item .project-title {
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+    opacity: 0; /* Hidden by default */
+    font-size: 1.5rem; /* Adjust as needed */
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5); /* Add some shadow for readability */
+}
+
+.project-item:hover .project-title {
+    opacity: 1; /* Show on hover */
+    transform: translate(-50%, -50%) scale(1.0); /* Remain at scale 1 after initial appearance, or adjust for a subtle zoom */
+}
+
+/* Style for the header when scrolled */
+.header-scrolled {
+    background-color: #343a40 !important; /* Darker background when scrolled */
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Ensure project images fill their container */
+.project-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures images cover the area without distortion */
+}
+
+<style >
+/* Styles for store cards */
+.store-card {
+    border: none;
+    border-radius: 10px;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    overflow: hidden;
+}
+
+.store-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card-img-top-container {
+    height: 200px; /* Fixed height for consistency */
+    overflow: hidden;
+}
+
+.store-item-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.store-card:hover .store-item-img {
+    transform: scale(1.05);
+}
+
+.overlay-text {
+    background-color: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none; /* Allows clicks to pass through */
+}
+
+.store-card:hover .overlay-text {
+    opacity: 1;
+}
+
+.overlay-text .project-title {
+    font-size: 1.25rem;
+    text-align: center;
+    padding: 0 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    margin-bottom: 0.5rem;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* General input/select styling */
+.form-control, .form-select {
+    border-radius: 8px;
+    border-color: #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+.input-group-text {
+    border-radius: 8px 0 0 8px;
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.btn-outline-primary {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    transition: all 0.2s ease;
+}
+
+    .btn-outline-primary:hover {
+        background-color: var(--bs-primary);
+        color: white;
+    }
+
+.btn-link {
+    color: var(--bs-secondary);
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+    .btn-link:hover {
+        color: var(--bs-dark);
+    }
+
+</style >
+<style >
+/* Add styles for project images to ensure consistent sizing and hover effects */
+.project-item {
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    border-radius: 8px; /* Optional: adds rounded corners */
+    overflow: hidden; /* Ensures content stays within rounded corners */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+.project-item:hover {
+    transform: translateY(-5px); /* Lift effect */
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); /* More prominent shadow on hover */
+}
+
+.project-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures image covers the area without distortion */
+    transition: transform 0.5s ease; /* Smooth zoom effect */
+}
+
+.project-item:hover .project-img {
+    transform: scale(1.05); /* Slightly zoom image on hover */
+}
+
+.project-title {
+    background-color: rgba(0, 0, 0, 0.6); /* Semi-transparent overlay for text */
+    padding: 8px 15px;
+    border-radius: 4px;
+    opacity: 0; /* Hidden by default */
+    transition: opacity 0.3s ease-in-out;
+    pointer-events: none; /* Allows clicks to pass through to the parent div */
+    white-space: nowrap; /* Prevent title from wrapping */
+    text-overflow: ellipsis; /* Add ellipsis if title is too long */
+    max-width: 90%; /* Limit width of the title overlay */
+}
+
+.project-item:hover .project-title {
+    opacity: 1; /* Show title on hover */
+}
+
+/* Styles for the header scroll effect */
+.header-scrolled {
+    background-color: #343a40 !important; /* Darker background when scrolled */
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Existing styles for the video background and text overlay */
+.bg-gradient-to-t-black {
+    background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0));
+}
+
+<style >
+/* Estilos para el efecto de scroll del header (copiado de Home.razor) */
+.header-scrolled {
+    background-color: #343a40 !important; /* Fondo más oscuro cuando hay scroll */
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Estilos generales para inputs y textareas para que coincidan con el diseño */
+.form-control, .form-select {
+    border-radius: 8px;
+    border-color: #dee2e6;
+    padding: 0.75rem 1rem;
+}
+
+    .form-control::placeholder {
+        color: #6c757d; /* Color del placeholder */
+        opacity: 0.7;
+    }
+
+    .form-control:focus {
+        border-color: var(--bs-primary); /* Color primario al enfocar */
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), .25);
+    }
+
+.btn-primary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+    .btn-primary:hover {
+        background-color: darken(var(--bs-primary), 10%); /* Oscurecer un poco al pasar el ratón */
+        border-color: darken(var(--bs-primary), 10%);
+    }
+
+.map-container {
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden; /* Asegura que el iframe o la imagen se ajusten a los bordes redondeados */
+}
+
+.hover-dark:hover {
+    color: var(--bs-dark) !important;
+}
+
+</style >
+
+</style >
