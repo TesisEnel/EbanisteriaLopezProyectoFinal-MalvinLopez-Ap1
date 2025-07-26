@@ -1,0 +1,145 @@
+﻿@page "/store"
+
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject ProductoServices ProductoServices
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Tienda - Ebanisteria Lopez</PageTitle>
+
+<main>
+    
+    <div class="position-relative d-flex flex-column justify-content-center align-items-center text-white"
+         style="height: 50vh; max-height: 25rem; background-image:url('/imagenes/store-hero.jpg'); background-size: cover; background-position: center;">
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="z-index: -1;"></div>
+        <div class="container text-center py-5 position-relative z-1">
+            <h1 class="display-4 fw-bold text-white mb-4">Nuestra Tienda</h1>
+            <p class="lead mb-0">Encuentra piezas únicas de mobiliario y carpintería artesanal.</p>
+        </div>
+    </div>
+
+    <section class="container py-5">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <input type="text" class="form-control" placeholder="Buscar por nombre..."
+                       @bind="SearchTerm" @bind:event="oninput" />
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" @bind="SelectedCategory">
+                    <option value="">Todas las categorías</option>
+                    @foreach (var cat in AvailableCategories)
+                    {
+                        <option value="@cat">@cat</option>
+                    }
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" @bind="SelectedPriceRange">
+                    <option value="">Todos los precios</option>
+                    <option value="0-5000">Hasta $5,000</option>
+                    <option value="5001-10000">$5,001 - $10,000</option>
+                    <option value="10001-20000">$10,001 - $20,000</option>
+                    <option value="20001-max">Más de $20,000</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            @if (FilteredProducts == null)
+            {
+                <div class="text-center">
+                    <div class="spinner-border text-primary"></div>
+                    <p>Cargando productos...</p>
+                </div>
+            }
+            else if (!FilteredProducts.Any())
+            {
+                <div class="text-center">
+                    <p>No se encontraron productos.</p>
+                </div>
+            }
+            else
+            {
+                @foreach (var product in FilteredProducts)
+                {
+                    var mainImage = product.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.Url ?? "/imagenes/no-image.jpg";
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3">
+                        <div class="card h-100 shadow-sm">
+                            <img src="@mainImage" class="card-img-top" alt="@product.Detalle?.Descripcion" style="height: 200px; object-fit: cover;" />
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">@product.Detalle?.Descripcion</h5>
+                                <p class="card-text text-muted">@product.Detalle?.Material</p>
+                                <span class="text-primary fw-bold mb-2">@product.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</span>
+                                <div class="mt-auto d-flex justify-content-between">
+                                    <button class="btn btn-outline-primary btn-sm" @onclick="() => AddToCart(product.ProductoId)">Añadir</button>
+                                    <a href="/admin/products/edit/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Editar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </section>
+</main>
+
+@code {
+    private List<Producto>? AllProducts;
+    private List<Producto>? FilteredProducts;
+    private List<string> AvailableCategories = new();
+
+    private string SearchTerm = string.Empty;
+    private string SelectedCategory = string.Empty;
+    private string SelectedPriceRange = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        AllProducts = await ProductoServices.Listar(p => true);
+        AvailableCategories = AllProducts
+            .Where(p => p.Categoria != null)
+            .Select(p => p.Categoria!.Nombre)
+            .Distinct()
+            .ToList();
+
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        if (AllProducts == null)
+        {
+            FilteredProducts = new();
+            return;
+        }
+
+        var query = AllProducts.AsEnumerable();
+
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+            query = query.Where(p => p.Detalle != null && p.Detalle.Descripcion.Contains(SearchTerm, StringComparison.OrdinalIgnoreCase));
+
+        if (!string.IsNullOrEmpty(SelectedCategory))
+            query = query.Where(p => p.Categoria != null && p.Categoria.Nombre == SelectedCategory);
+
+        if (!string.IsNullOrEmpty(SelectedPriceRange))
+        {
+            query = SelectedPriceRange switch
+            {
+                "0-5000" => query.Where(p => p.Precio <= 5000),
+                "5001-10000" => query.Where(p => p.Precio > 5000 && p.Precio <= 10000),
+                "10001-20000" => query.Where(p => p.Precio > 10000 && p.Precio <= 20000),
+                "20001-max" => query.Where(p => p.Precio > 20000),
+                _ => query
+            };
+        }
+
+        FilteredProducts = query.ToList();
+    }
+
+    private void AddToCart(int productoId)
+    {
+        var producto = AllProducts?.FirstOrDefault(p => p.ProductoId == productoId);
+        if (producto != null)
+        {
+            JSRuntime.InvokeVoidAsync("alert", $"Producto añadido: {producto.Detalle?.Descripcion}");
+        }
+    }
+}
