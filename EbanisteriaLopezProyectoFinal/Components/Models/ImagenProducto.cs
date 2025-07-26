@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EbanisteriaLopezProyectoFinal.Components.Models
-{
+namespace EbanisteriaLopezProyectoFinal.Components.Models;
     public class ImagenProducto
     {
         [Key]
@@ -12,4 +11,4 @@ namespace EbanisteriaLopezProyectoFinal.Components.Models
         public int ProductoId { get; set; }
         public Producto? Producto { get; set; }
     }
-}
+
