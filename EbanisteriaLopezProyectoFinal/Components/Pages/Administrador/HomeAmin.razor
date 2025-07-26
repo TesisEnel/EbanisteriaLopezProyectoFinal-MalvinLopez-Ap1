@@ -1,0 +1,47 @@
+﻿@page "/admin/home"
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject ProductoServices ProductoServices
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Panel de Administración - Ebanisteria Lopez</PageTitle>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h1>Panel de Administración</h1>
+
+      
+        <div class="d-flex gap-3 mt-5">
+            <a href="/Crear" class="btn btn-outline-primary">
+                <i class="bi bi-box"></i> Gestionar Productos
+            </a>
+            <a href="/admin/orders" class="btn btn-outline-success">
+                <i class="bi bi-cart"></i> Gestionar Pedidos
+            </a>
+            <a href="/admin/users" class="btn btn-outline-warning">
+                <i class="bi bi-person"></i> Gestionar Usuarios
+            </a>
+            <a href="/admin/settings" class="btn btn-outline-secondary">
+                <i class="bi bi-gear"></i> Configuración
+            </a>
+        </div>
+
+        
+        <div class="mt-5">
+            <h2>Contenido adicional</h2>
+            <p>Este es el panel donde podrás gestionar todos los aspectos de tu tienda, productos, pedidos, etc.</p>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <p>No tienes acceso a esta página. Solo los administradores pueden acceder.</p>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<Producto> productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+      
+    }
+}

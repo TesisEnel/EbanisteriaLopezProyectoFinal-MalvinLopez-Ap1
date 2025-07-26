@@ -1,0 +1,175 @@
+﻿@page "/Crear"
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject ProductoServices ProductoServices
+@inject CategoriaServices CategoriaServices
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Crear Producto</PageTitle>
+
+<EditForm Model="@producto" OnValidSubmit="@Guardar" FormName="CrearProductoForm">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="titleCreate">
+        <h1>Crear nuevo producto</h1>
+    </div>
+
+    <div class="containerCreate">
+        @* Subida de imágenes *@
+        <div class="inputImage text-center">
+            <span class="fs-3 text-secondary w-100 d-block">
+                <i class="bi bi-images"></i>
+            </span>
+            <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
+            @if (archivosSeleccionados.Count > 0)
+            {
+                <div class="mt-2 text-success">@archivosSeleccionados.Count archivo(s) seleccionado(s)</div>
+            }
+        </div>
+
+        <div class="containerForm mb-3">
+            <label class="form-label fs-5">Nombre</label>
+            <InputText class="form-control" @bind-Value="producto.Nombre" />
+        </div>
+
+        <div class="containerForm mb-3">
+            <label class="form-label fs-5">Precio</label>
+            <InputNumber class="form-control" @bind-Value="producto.Precio" />
+        </div>
+
+        <div class="containerForm mb-3">
+            <label class="form-label fs-5">Categoría (Nombre)</label>
+            <InputText class="form-control" @bind-Value="categoriaNombre" placeholder="Ej. Mesa, Silla, Cama" />
+        </div>
+
+        <div class="containerForm mb-3">
+            <label class="form-label fs-5">Estado</label>
+            <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
+                <option value="">Seleccione un estado</option>
+                <option value="1">Disponible</option>
+                <option value="2">Agotado</option>
+            </InputSelect>
+        </div>
+
+        <div class="containerForm mb-3">
+            <label class="form-label fs-5">Descripción</label>
+            <InputTextArea class="form-control" @bind-Value="producto.Detalle!.Descripcion" />
+        </div>
+
+        <div class="containerForm-row mb-3">
+            <div class="containerForm-half">
+                <label class="form-label fs-5">Material</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Material" />
+            </div>
+            <div class="containerForm-half">
+                <label class="form-label fs-5">Color</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Color" />
+            </div>
+            <div class="containerForm-half">
+                <label class="form-label fs-5">Dimensiones</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Dimensiones" />
+            </div>
+        </div>
+
+        <div class="container d-flex justify-content-center gap-2">
+            <a href="/store" class="btn btn-secondary">Volver</a>
+            <button type="submit" class="btn btn-primary">Guardar</button>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Producto producto = new()
+    {
+        Nombre = "",
+        Precio = 0,
+        CategoriaId = 0,
+        EstadoProductoId = 1,
+        Detalle = new ProductoDetalle()
+    };
+
+    private string categoriaNombre = string.Empty;
+    private List<Categoria> categorias = new();
+    private List<IBrowserFile> archivosSeleccionados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await CategoriaServices.Listar(c => true);
+    }
+
+    private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
+    {
+        archivosSeleccionados = e.GetMultipleFiles().ToList();
+    }
+
+    private async Task Guardar()
+    {
+        if (producto.EstadoProductoId <= 0)
+        {
+            ToastService.ShowError("Seleccione un estado válido.");
+            return;
+        }
+
+       
+        if (string.IsNullOrWhiteSpace(categoriaNombre))
+        {
+            ToastService.ShowError("Ingrese un nombre de categoría.");
+            return;
+        }
+
+        var categoria = categorias.FirstOrDefault(c => c.Nombre.Equals(categoriaNombre, StringComparison.OrdinalIgnoreCase));
+
+        if (categoria == null)
+        {
+            categoria = new Categoria { Nombre = categoriaNombre };
+            var insertada = await CategoriaServices.Insertar(categoria);
+
+            if (!insertada)
+            {
+                ToastService.ShowError("No se pudo insertar la categoría.");
+                return;
+            }
+
+            categorias.Add(categoria);
+        }
+
+        producto.CategoriaId = categoria.CategoriaId;
+
+        var guardado = await ProductoServices.Guardar(producto);
+
+        if (guardado && archivosSeleccionados.Any())
+        {
+            int orden = 1;
+
+            foreach (var archivo in archivosSeleccionados)
+            {
+                var buffer = new byte[archivo.Size];
+                await archivo.OpenReadStream().ReadAsync(buffer);
+                var base64 = Convert.ToBase64String(buffer);
+                var dataUrl = $"data:{archivo.ContentType};base64,{base64}";
+
+                var imagen = new ImagenProducto
+                {
+                    ProductoId = producto.ProductoId,
+                    Url = dataUrl,
+                    Orden = orden++
+                };
+
+                await ProductoServices.AgregarImagen(imagen);
+            }
+        }
+
+        if (guardado)
+        {
+            ToastService.ShowSuccess("Producto guardado correctamente.");
+            NavigationManager.NavigateTo("/store");
+        }
+        else
+        {
+            ToastService.ShowError("Error al guardar el producto.");
+        }
+    }
+}
