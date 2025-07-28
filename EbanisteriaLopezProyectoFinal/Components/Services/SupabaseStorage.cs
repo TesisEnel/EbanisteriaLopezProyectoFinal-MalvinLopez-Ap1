@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 
-public static class SupabaseStorage
+public class SupabaseStorage
 {
-    public static async Task<List<string>> UploadFiles(List<IBrowserFile> files)
+    private readonly Supabase.Client _supabaseClient;
+
+    public SupabaseStorage()
     {
-        var urls = new List<string>();
-        foreach (var file in files)
-        {
-            
-            urls.Add($"https://tusupabase.com/{file.Name}");
-        }
-        return urls;
+        _supabaseClient = new Supabase.Client(
+            "https://<tu-url>.supabase.co",
+            "<tu-clave-anon>"
+        );
+    }
+
+    public async Task<List<string>> UploadFiles(List<IBrowserFile> archivos)
+    {
+        // Tu lógica para subir los archivos
+        return new List<string>(); // ejemplo
     }
 }
