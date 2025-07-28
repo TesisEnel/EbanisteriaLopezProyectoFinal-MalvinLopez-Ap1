@@ -1,33 +1,17 @@
 ﻿@inherits LayoutComponentBase
 @layout EbanisteriaLopezProyectoFinal.Components.Layout.MainLayout
 
-<PageTitle>Mi Cuenta - Ebanisteria Lopez</PageTitle>
+<h1>Manage your account</h1>
 
-<div class="account-management-wrapper py-5">
-    @* Custom wrapper for overall page background *@
-    <div class="container account-management-container bg-white shadow-lg p-4 p-lg-5 rounded-3">
-        @* Main content card with padding and rounded corners *@
-        <h1 class="text-center mb-5 fw-bold text-dark">
-            <i class="bi bi-person-circle me-3 text-primary"></i>Gestión de mi Cuenta
-        </h1> @* Enhanced title with icon and accent color *@
-
-        <div class="row">
-            <div class="col-lg-3 mb-4 mb-lg-0">
-                <div class="manage-nav-panel bg-light p-3 rounded-2 shadow-sm">
-                    @* Light background panel for navigation *@
-                    <h2 class="h5 mb-3 text-secondary border-bottom pb-2">Navegación</h2> @* Panel title with a separator *@
-                    <ManageNavMenu />
-                </div>
-            </div>
-            <div class="col-lg-9">
-                <div class="content-panel bg-white p-3 p-md-4 rounded-2">
-                    @* Content panel, maybe slightly offset or with a border *@
-                    <h2 class="h4 mb-4 text-dark">Configuración de la Cuenta</h2>
-                    <hr class="mb-4" />
-                    @Body
-                </div>
-            </div>
+<div>
+    <h2>Change your account settings</h2>
+    <hr />
+    <div class="row">
+        <div class="col-lg-3">
+            <ManageNavMenu />
+        </div>
+        <div class="col-lg-9">
+            @Body
         </div>
     </div>
 </div>
-

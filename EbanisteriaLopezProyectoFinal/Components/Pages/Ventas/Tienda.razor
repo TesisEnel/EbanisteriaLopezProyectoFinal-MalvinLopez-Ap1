@@ -1,12 +1,13 @@
 ﻿@page "/store"
+
 @using EbanisteriaLopezProyectoFinal.Components.Services
 @inject ProductoServices ProductoServices
-@inject CarritoService CarritoService
 @inject IJSRuntime JSRuntime
 
 <PageTitle>Tienda - Ebanisteria Lopez</PageTitle>
 
 <main>
+    
     <div class="position-relative d-flex flex-column justify-content-center align-items-center text-white"
          style="height: 50vh; max-height: 25rem; background-image:url('/imagenes/store-hero.jpg'); background-size: cover; background-position: center;">
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="z-index: -1;"></div>
@@ -75,8 +76,11 @@
                                             <a href="/admin/products/edit/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Editar</a>
                                         </Authorized>
                                         <NotAuthorized>
+
                                         </NotAuthorized>
                                     </AuthorizeView>
+
+                                   
                                 </div>
                             </div>
                         </div>
@@ -144,8 +148,6 @@
         var producto = AllProducts?.FirstOrDefault(p => p.ProductoId == productoId);
         if (producto != null)
         {
-            // Agregar el producto al carrito
-            CarritoService.AgregarProducto(producto, 1);
             JSRuntime.InvokeVoidAsync("alert", $"Producto añadido: {producto.Detalle?.Descripcion}");
         }
     }

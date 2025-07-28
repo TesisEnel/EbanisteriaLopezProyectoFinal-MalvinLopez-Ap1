@@ -45,9 +45,7 @@ builder.Services.AddScoped<IContactoService, ContactoService>();
 builder.Services.AddScoped<CategoriaServices>();
 
 builder.Services.AddScoped<CarritoService>();
-builder.Services.AddHttpClient<SupabaseStorage>();
-
-
+builder.Services.AddScoped<SupabaseStorage>();
 
 
 
