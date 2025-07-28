@@ -1,15 +1,20 @@
-﻿@page "/Crear"
+﻿@page "/admin/productos/create"
+@attribute [Authorize(Roles = "Admin")]
 @using EbanisteriaLopezProyectoFinal.Components.Services
+@using Blazored.Toast.Services
+@using Microsoft.EntityFrameworkCore;
+
 @inject ProductoServices ProductoServices
 @inject CategoriaServices CategoriaServices
 @inject NavigationManager NavigationManager
+@inject SupabaseStorage SupabaseStorage
 @inject IToastService ToastService
-@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @rendermode InteractiveServer
 
 <PageTitle>Crear Producto</PageTitle>
 
-<EditForm Model="@producto" OnValidSubmit="@Guardar" FormName="CrearProductoForm">
+<EditForm Model="@producto" OnValidSubmit="@Guardar">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -18,31 +23,35 @@
     </div>
 
     <div class="containerCreate">
-        @* Subida de imágenes *@
-        <div class="inputImage text-center">
-            <span class="fs-3 text-secondary w-100 d-block">
-                <i class="bi bi-images"></i>
-            </span>
-            <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
-            @if (archivosSeleccionados.Count > 0)
-            {
-                <div class="mt-2 text-success">@archivosSeleccionados.Count archivo(s) seleccionado(s)</div>
-            }
-        </div>
+        <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
+
+        @if (archivosSeleccionados.Count > 0)
+        {
+            <div class="mt-2 text-success">
+                @archivosSeleccionados.Count archivo(s) seleccionado(s)
+            </div>
+        }
+
 
         <div class="containerForm mb-3">
             <label class="form-label fs-5">Nombre</label>
-            <InputText class="form-control" @bind-Value="producto.Nombre" />
+            <InputText class="form-control" @bind-Value="producto.Nombre" placeholder="Nombre del producto" />
         </div>
 
         <div class="containerForm mb-3">
             <label class="form-label fs-5">Precio</label>
-            <InputNumber class="form-control" @bind-Value="producto.Precio" />
+            <InputNumber class="form-control" @bind-Value="producto.Precio" placeholder="Precio del producto" />
         </div>
 
         <div class="containerForm mb-3">
-            <label class="form-label fs-5">Categoría (Nombre)</label>
-            <InputText class="form-control" @bind-Value="categoriaNombre" placeholder="Ej. Mesa, Silla, Cama" />
+            <label class="form-label fs-5">Categoría</label>
+            <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
+                <option value="">Seleccione una categoría</option>
+                @foreach (var cat in categorias)
+                {
+                    <option value="@cat.CategoriaId">@cat.Nombre</option>
+                }
+            </InputSelect>
         </div>
 
         <div class="containerForm mb-3">
@@ -56,26 +65,26 @@
 
         <div class="containerForm mb-3">
             <label class="form-label fs-5">Descripción</label>
-            <InputTextArea class="form-control" @bind-Value="producto.Detalle!.Descripcion" />
+            <InputTextArea class="form-control" @bind-Value="producto.Detalle!.Descripcion" placeholder="Descripción del producto" />
         </div>
 
         <div class="containerForm-row mb-3">
             <div class="containerForm-half">
                 <label class="form-label fs-5">Material</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Material" />
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Material" placeholder="Material del producto" />
             </div>
             <div class="containerForm-half">
                 <label class="form-label fs-5">Color</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Color" />
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Color" placeholder="Color del producto" />
             </div>
             <div class="containerForm-half">
                 <label class="form-label fs-5">Dimensiones</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Dimensiones" />
+                <InputText class="form-control" @bind-Value="producto.Detalle!.Dimensiones" placeholder="Ej. 100x50x30cm" />
             </div>
         </div>
 
         <div class="container d-flex justify-content-center gap-2">
-            <a href="/store" class="btn btn-secondary">Volver</a>
+            <a href="/admin/productos" class="btn btn-secondary">Volver</a>
             <button type="submit" class="btn btn-primary">Guardar</button>
         </div>
     </div>
@@ -83,21 +92,24 @@
 
 @code {
     private Producto producto = new()
-    {
-        Nombre = "",
-        Precio = 0,
-        CategoriaId = 0,
-        EstadoProductoId = 1,
-        Detalle = new ProductoDetalle()
-    };
+        {
+            Nombre = string.Empty,
+            Precio = 0,
+            CategoriaId = 0,
+            EstadoProductoId = 1,
+            Detalle = new ProductoDetalle()
+        };
 
-    private string categoriaNombre = string.Empty;
-    private List<Categoria> categorias = new();
     private List<IBrowserFile> archivosSeleccionados = new();
+    private List<Categoria> categorias = new();
 
     protected override async Task OnInitializedAsync()
     {
         categorias = await CategoriaServices.Listar(c => true);
+        if (categorias.Any())
+        {
+            producto.CategoriaId = categorias.First().CategoriaId;
+        }
     }
 
     private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
@@ -107,69 +119,51 @@
 
     private async Task Guardar()
     {
-        if (producto.EstadoProductoId <= 0)
+        try
         {
-            ToastService.ShowError("Seleccione un estado válido.");
-            return;
-        }
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            if (!user.Identity?.IsAuthenticated ?? true)
+                throw new InvalidOperationException("Usuario no autorizado.");
 
-       
-        if (string.IsNullOrWhiteSpace(categoriaNombre))
-        {
-            ToastService.ShowError("Ingrese un nombre de categoría.");
-            return;
-        }
+            // Asegurarse de que la relación entre Producto y ProductoDetalle esté establecida
+            producto.Detalle.Producto = producto;
 
-        var categoria = categorias.FirstOrDefault(c => c.Nombre.Equals(categoriaNombre, StringComparison.OrdinalIgnoreCase));
+            var guardado = await ProductoServices.Guardar(producto);
 
-        if (categoria == null)
-        {
-            categoria = new Categoria { Nombre = categoriaNombre };
-            var insertada = await CategoriaServices.Insertar(categoria);
-
-            if (!insertada)
+            if (guardado && archivosSeleccionados.Any())
             {
-                ToastService.ShowError("No se pudo insertar la categoría.");
-                return;
-            }
-
-            categorias.Add(categoria);
-        }
-
-        producto.CategoriaId = categoria.CategoriaId;
-
-        var guardado = await ProductoServices.Guardar(producto);
-
-        if (guardado && archivosSeleccionados.Any())
-        {
-            int orden = 1;
-
-            foreach (var archivo in archivosSeleccionados)
-            {
-                var buffer = new byte[archivo.Size];
-                await archivo.OpenReadStream().ReadAsync(buffer);
-                var base64 = Convert.ToBase64String(buffer);
-                var dataUrl = $"data:{archivo.ContentType};base64,{base64}";
-
-                var imagen = new ImagenProducto
+                var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
+                foreach (var url in urls)
                 {
-                    ProductoId = producto.ProductoId,
-                    Url = dataUrl,
-                    Orden = orden++
-                };
+                    var imagen = new ImagenProducto
+                        {
+                            ProductoId = producto.ProductoId,
+                            Url = url,
+                            Orden = urls.IndexOf(url) + 1
+                        };
+                    await ProductoServices.AgregarImagen(imagen);
+                }
+            }
 
-                await ProductoServices.AgregarImagen(imagen);
+            if (guardado)
+            {
+                ToastService.ShowSuccess("Producto creado correctamente.");
+                NavigationManager.NavigateTo("/admin/home");
+            }
+            else
+            {
+                ToastService.ShowError("Error al guardar el producto.");
             }
         }
-
-        if (guardado)
+        catch (DbUpdateException dbEx)
         {
-            ToastService.ShowSuccess("Producto guardado correctamente.");
-            NavigationManager.NavigateTo("/store");
+            var inner = dbEx.InnerException?.Message ?? dbEx.Message;
+            ToastService.ShowError($"Error en la base de datos: {inner}");
         }
-        else
+        catch (Exception ex)
         {
-            ToastService.ShowError("Error al guardar el producto.");
+            ToastService.ShowError($"Error general: {ex.Message}");
         }
     }
 }
