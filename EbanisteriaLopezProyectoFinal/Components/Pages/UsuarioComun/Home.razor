@@ -7,6 +7,7 @@
 @inject ProductoServices ProductoServices
 @inject IJSRuntime JSRuntime
 
+
 <PageTitle>Inicio - Ebanisteria Lopez</PageTitle>
 
 <main>
@@ -60,14 +61,32 @@
 
                     <AuthorizeView>
                         <Authorized>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="text-white">Hola, @context.User.Identity?.Name</span>
-                                <form method="post" action="/Account/Logout" class="d-inline">
-                                    <button type="submit" class="btn btn-outline-danger">
-                                        Cerrar Sesión
-                                    </button>
-                                </form>
+                            
+                            <div class="dropdown">
+                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="miCuentaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Mi Cuenta
+                                </button>
+                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="miCuentaDropdown">
+                                    <li>
+                                        <h6 class="dropdown-header">Hola, @context.User.Identity?.Name</h6>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="Account/Manage">Ir a mi perfil</a>
+                                    </li>
+                                    <li>
+                                        <form action="Account/Logout" method="post" class="dropdown-item p-0">
+                                            <AntiforgeryToken />
+                                            <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+                                            <button type="submit" class="btn w-100 text-start">
+                                                <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </div>
+
+
+
                         </Authorized>
                         <NotAuthorized>
                             <a href="/Account/Login" class="btn btn-outline-light">
@@ -273,7 +292,14 @@
 @code {
     private IJSObjectReference? JSModule { get; set; }
     private bool IsScrolled { get; set; } = false;
+    private string? currentUrl;
     private DotNetObjectReference<object>? dotNetRef;
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        StateHasChanged();
+    }
+
 
     private List<Producto>? productos;
 
@@ -324,4 +350,6 @@
         }
         dotNetRef?.Dispose();
     }
+    
+}
 }
