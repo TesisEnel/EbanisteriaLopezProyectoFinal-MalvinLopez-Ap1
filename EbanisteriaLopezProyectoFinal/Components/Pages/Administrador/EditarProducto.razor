@@ -1,0 +1,193 @@
+﻿@page "/admin/productos/editar/{ProductoId:int}"
+@attribute [Authorize(Roles = "Admin")]
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject ProductoService ProductoService
+@inject CategoriaServices CategoriaServices
+@inject SupabaseStorageService SupabaseStorage
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Editar Producto</PageTitle>
+
+<h3 class="mb-4">Editar producto</h3>
+
+@if (producto != null)
+{
+    <EditForm Model="@producto" OnValidSubmit="@Actualizar">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+    
+        <div class="mb-3">
+            <label class="form-label">Título</label>
+            <InputText class="form-control" @bind-Value="producto.Nombre" />
+        </div>
+
+    
+        <div class="mb-3">
+            <label class="form-label">Precio</label>
+            <InputNumber class="form-control" @bind-Value="producto.Precio" />
+        </div>
+
+        
+        <div class="mb-3">
+            <label class="form-label">Categoría</label>
+            <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
+                @foreach (var categoria in categorias)
+                {
+                    <option value="@categoria.CategoriaId">@categoria.Nombre</option>
+                }
+            </InputSelect>
+        </div>
+
+       
+        <div class="mb-3">
+            <label class="form-label">Estado Producto</label>
+            <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
+                <option value="1">Disponible</option>
+                <option value="2">Agotado</option>
+                <option value="3">En espera</option>
+            </InputSelect>
+        </div>
+
+        
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <InputTextArea class="form-control" @bind-Value="producto.Detalle.Descripcion" />
+        </div>
+
+      
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Material</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle.Material" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Color</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle.Color" />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Dimensiones</label>
+                <InputText class="form-control" @bind-Value="producto.Detalle.Dimensiones" />
+            </div>
+        </div>
+
+   
+        @if (producto.Imagenes?.Count > 0)
+        {
+            <div class="mb-3">
+                <label class="form-label">Imágenes actuales</label>
+                <div class="d-flex flex-wrap gap-2">
+                    @foreach (var img in producto.Imagenes)
+                    {
+                        <div class="position-relative">
+                            <img src="@img.UrlImagen" alt="imagen" style="width:100px; height:100px; object-fit:cover;" class="rounded shadow-sm" />
+                          
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+
+      
+        <div class="mb-3">
+            <label class="form-label">Agregar nuevas imágenes (máx. 5)</label>
+            <InputFile OnChange="CargarArchivosSeleccionados" multiple accept="image/*" />
+            @if (archivosSeleccionados.Count > 0)
+            {
+                <div class="text-success mt-2">
+                    @archivosSeleccionados.Count archivo(s) seleccionado(s)
+                </div>
+            }
+        </div>
+
+        <div class="mt-4">
+            <button type="submit" class="btn btn-primary">Actualizar</button>
+            <a href="/store" class="btn btn-secondary ms-2">Cancelar</a>
+        </div>
+    </EditForm>
+}
+else
+{
+    <p>Cargando producto...</p>
+}
+
+@code {
+    [Parameter]
+    public int ProductoId { get; set; }
+
+    private Producto? producto;
+    private List<Categoria> categorias = new();
+    private List<IBrowserFile> archivosSeleccionados = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        categorias = await CategoriaServices.Listar(c => true);
+
+        producto = await ProductoService.Buscar(ProductoId);
+
+        if (producto == null)
+        {
+            ToastService.ShowError("Producto no encontrado.");
+            NavigationManager.NavigateTo("/store");
+            return;
+        }
+
+        producto.Detalle ??= new ProductoDetalle();
+    }
+
+    private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
+    {
+        var archivos = e.GetMultipleFiles().ToList();
+
+        if (archivos.Count > 5)
+        {
+            ToastService.ShowWarning("Solo puedes seleccionar hasta 5 imágenes.");
+            archivosSeleccionados = archivos.Take(5).ToList();
+        }
+        else
+        {
+            archivosSeleccionados = archivos;
+        }
+    }
+
+    private async Task Actualizar()
+    {
+        try
+        {
+            var actualizado = await ProductoService.Modificar(producto!);
+
+            if (actualizado && archivosSeleccionados.Any())
+            {
+                var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
+                foreach (var url in urls)
+                {
+                    var imagen = new ImagenProducto
+                    {
+                        ProductoId = producto!.ProductoId,
+                        UrlImagen = url,
+                        Orden = urls.IndexOf(url) + 1
+                    };
+                    await ProductoService.AgregarImagen(imagen);
+                }
+            }
+
+            if (actualizado)
+            {
+                ToastService.ShowSuccess("Producto actualizado correctamente.");
+                NavigationManager.NavigateTo("/store");
+            }
+            else
+            {
+                ToastService.ShowError("Error al actualizar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error: {ex.Message}");
+        }
+    }
+}
