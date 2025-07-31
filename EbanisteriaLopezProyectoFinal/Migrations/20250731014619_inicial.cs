@@ -52,6 +52,32 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Categoria",
+                columns: table => new
+                {
+                    CategoriaId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Categoria", x => x.CategoriaId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "EstadoProducto",
+                columns: table => new
+                {
+                    EstadoProductoId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_EstadoProducto", x => x.EstadoProductoId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "AspNetRoleClaims",
                 columns: table => new
                 {
@@ -157,6 +183,77 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Producto",
+                columns: table => new
+                {
+                    ProductoId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nombre = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Precio = table.Column<decimal>(type: "numeric(18,2)", nullable: false),
+                    CategoriaId = table.Column<int>(type: "integer", nullable: false),
+                    EstadoProductoId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Producto", x => x.ProductoId);
+                    table.ForeignKey(
+                        name: "FK_Producto_Categoria_CategoriaId",
+                        column: x => x.CategoriaId,
+                        principalTable: "Categoria",
+                        principalColumn: "CategoriaId");
+                    table.ForeignKey(
+                        name: "FK_Producto_EstadoProducto_EstadoProductoId",
+                        column: x => x.EstadoProductoId,
+                        principalTable: "EstadoProducto",
+                        principalColumn: "EstadoProductoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ImagenProducto",
+                columns: table => new
+                {
+                    ImagenId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    ProductoId = table.Column<int>(type: "integer", nullable: false),
+                    UrlImagen = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Orden = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ImagenProducto", x => x.ImagenId);
+                    table.ForeignKey(
+                        name: "FK_ImagenProducto_Producto_ProductoId",
+                        column: x => x.ProductoId,
+                        principalTable: "Producto",
+                        principalColumn: "ProductoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ProductoDetalle",
+                columns: table => new
+                {
+                    ProductoDetalleId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Descripcion = table.Column<string>(type: "text", nullable: false),
+                    Material = table.Column<string>(type: "text", nullable: false),
+                    Color = table.Column<string>(type: "text", nullable: false),
+                    Dimensiones = table.Column<string>(type: "text", nullable: false),
+                    ProductoId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductoDetalle", x => x.ProductoDetalleId);
+                    table.ForeignKey(
+                        name: "FK_ProductoDetalle_Producto_ProductoId",
+                        column: x => x.ProductoId,
+                        principalTable: "Producto",
+                        principalColumn: "ProductoId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
@@ -193,6 +290,33 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ImagenProducto_ProductoId",
+                table: "ImagenProducto",
+                column: "ProductoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Producto_CategoriaId",
+                table: "Producto",
+                column: "CategoriaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Producto_EstadoProductoId",
+                table: "Producto",
+                column: "EstadoProductoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Producto_Nombre",
+                table: "Producto",
+                column: "Nombre",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductoDetalle_ProductoId",
+                table: "ProductoDetalle",
+                column: "ProductoId",
+                unique: true);
         }
 
         /// <inheritdoc />
@@ -214,10 +338,25 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "ImagenProducto");
+
+            migrationBuilder.DropTable(
+                name: "ProductoDetalle");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Producto");
+
+            migrationBuilder.DropTable(
+                name: "Categoria");
+
+            migrationBuilder.DropTable(
+                name: "EstadoProducto");
         }
     }
 }

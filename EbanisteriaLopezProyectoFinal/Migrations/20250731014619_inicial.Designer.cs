@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250725172019_inicial")]
+    [Migration("20250731014619_inicial")]
     partial class inicial
     {
         /// <inheritdoc />
@@ -24,6 +24,101 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Categoria", b =>
+                {
+                    b.Property<int>("CategoriaId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("CategoriaId"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("CategoriaId");
+
+                    b.ToTable("Categoria");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.EstadoProducto", b =>
+                {
+                    b.Property<int>("EstadoProductoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("EstadoProductoId"));
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("EstadoProductoId");
+
+                    b.ToTable("EstadoProducto");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.ImagenProducto", b =>
+                {
+                    b.Property<int>("ImagenId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ImagenId"));
+
+                    b.Property<int>("Orden")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UrlImagen")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.HasKey("ImagenId");
+
+                    b.HasIndex("ProductoId");
+
+                    b.ToTable("ImagenProducto");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.ProductoDetalle", b =>
+                {
+                    b.Property<int>("ProductoDetalleId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductoDetalleId"));
+
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Descripcion")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Dimensiones")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Material")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("ProductoId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("ProductoDetalleId");
+
+                    b.HasIndex("ProductoId")
+                        .IsUnique();
+
+                    b.ToTable("ProductoDetalle");
+                });
 
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Data.ApplicationUser", b =>
                 {
@@ -221,6 +316,62 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Producto", b =>
+                {
+                    b.Property<int>("ProductoId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ProductoId"));
+
+                    b.Property<int>("CategoriaId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("EstadoProductoId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<decimal>("Precio")
+                        .HasColumnType("decimal(18, 2)");
+
+                    b.HasKey("ProductoId");
+
+                    b.HasIndex("CategoriaId");
+
+                    b.HasIndex("EstadoProductoId");
+
+                    b.HasIndex("Nombre")
+                        .IsUnique();
+
+                    b.ToTable("Producto");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.ImagenProducto", b =>
+                {
+                    b.HasOne("Producto", "Producto")
+                        .WithMany("Imagenes")
+                        .HasForeignKey("ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.ProductoDetalle", b =>
+                {
+                    b.HasOne("Producto", "Producto")
+                        .WithOne("Detalle")
+                        .HasForeignKey("EbanisteriaLopezProyectoFinal.Components.Models.ProductoDetalle", "ProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Producto");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -270,6 +421,40 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Producto", b =>
+                {
+                    b.HasOne("EbanisteriaLopezProyectoFinal.Components.Models.Categoria", "Categoria")
+                        .WithMany("Productos")
+                        .HasForeignKey("CategoriaId");
+
+                    b.HasOne("EbanisteriaLopezProyectoFinal.Components.Models.EstadoProducto", "EstadoProducto")
+                        .WithMany("Productos")
+                        .HasForeignKey("EstadoProductoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Categoria");
+
+                    b.Navigation("EstadoProducto");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Categoria", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.EstadoProducto", b =>
+                {
+                    b.Navigation("Productos");
+                });
+
+            modelBuilder.Entity("Producto", b =>
+                {
+                    b.Navigation("Detalle");
+
+                    b.Navigation("Imagenes");
                 });
 #pragma warning restore 612, 618
         }

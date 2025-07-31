@@ -5,24 +5,24 @@
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     /// <inheritdoc />
-    public partial class mejoras : Migration
+    public partial class actualizatabla : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<byte[]>(
-                name: "Imagen",
+            migrationBuilder.AddColumn<string>(
+                name: "Color",
                 table: "Producto",
-                type: "bytea",
+                type: "text",
                 nullable: false,
-                defaultValue: new byte[0]);
+                defaultValue: "");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "Imagen",
+                name: "Color",
                 table: "Producto");
         }
     }

@@ -35,7 +35,7 @@
                     {
                         <tr>
                             <td style="width: 80px;">
-                                <img src="@item.Producto.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.Url ?? " /imagenes/no-image.jpg"" alt="imagen" class="img-fluid rounded" style="height: 60px; object-fit: cover;" />
+                                <img src="@item.Producto.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.UrlImagen?? " /imagenes/no-image.jpg"" alt="imagen" class="img-fluid rounded" style="height: 60px; object-fit: cover;" />
                             </td>
                             <td>@item.Producto.Detalle?.Descripcion</td>
                             <td class="text-center">@item.Cantidad</td>

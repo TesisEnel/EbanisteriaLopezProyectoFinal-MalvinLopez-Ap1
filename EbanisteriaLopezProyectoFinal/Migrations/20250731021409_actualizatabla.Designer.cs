@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250727224547_EliminarMoneda")]
-    partial class EliminarMoneda
+    [Migration("20250731021409_actualizatabla")]
+    partial class actualizatabla
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -61,11 +61,11 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.ImagenProducto", b =>
                 {
-                    b.Property<int>("ImagenProductoId")
+                    b.Property<int>("ImagenId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ImagenProductoId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ImagenId"));
 
                     b.Property<int>("Orden")
                         .HasColumnType("integer");
@@ -73,11 +73,12 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<int>("ProductoId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Url")
+                    b.Property<string>("UrlImagen")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
-                    b.HasKey("ImagenProductoId");
+                    b.HasKey("ImagenId");
 
                     b.HasIndex("ProductoId");
 
@@ -326,19 +327,20 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<int>("CategoriaId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Color")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<int>("EstadoProductoId")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Moneda")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<string>("Nombre")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
 
                     b.Property<decimal>("Precio")
-                        .HasColumnType("numeric");
+                        .HasColumnType("decimal(18, 2)");
 
                     b.HasKey("ProductoId");
 
@@ -454,8 +456,7 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
             modelBuilder.Entity("Producto", b =>
                 {
-                    b.Navigation("Detalle")
-                        .IsRequired();
+                    b.Navigation("Detalle");
 
                     b.Navigation("Imagenes");
                 });

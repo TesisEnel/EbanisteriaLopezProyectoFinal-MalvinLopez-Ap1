@@ -1,56 +1,18 @@
 ﻿using EbanisteriaLopezProyectoFinal.Components.Models;
 using EbanisteriaLopezProyectoFinal.Data;
+using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EbanisteriaLopezProyectoFinal.Components.Services;
 
-public class CategoriaServices
+public class CategoriaServices(IDbContextFactory<ApplicationDbContext> DbContext)
 {
-    private readonly ApplicationDbContext _context;
-
-    public CategoriaServices(ApplicationDbContext context)
+    public async Task<List<Categoria>> Listar(Expression<Func<Categoria, bool>> criterio)
     {
-        _context = context;
-    }
-
-    // Listar todas o filtradas
-    public async Task<List<Categoria>> Listar(Func<Categoria, bool> filtro)
-    {
-        return await Task.Run(() =>
-            _context.Categoria
-                .AsEnumerable()
-                .Where(filtro)
-                .ToList()
-        );
-    }
-
-    // Insertar nueva categoría
-    public async Task<bool> Insertar(Categoria categoria)
-    {
-        _context.Categoria.Add(categoria);
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    // Buscar por ID
-    public async Task<Categoria?> ObtenerPorId(int id)
-    {
-        return await _context.Categoria.FindAsync(id);
-    }
-
-    // Editar categoría
-    public async Task<bool> Editar(Categoria categoria)
-    {
-        _context.Categoria.Update(categoria);
-        return await _context.SaveChangesAsync() > 0;
-    }
-
-    // Eliminar categoría
-    public async Task<bool> Eliminar(int id)
-    {
-        var categoria = await _context.Categoria.FindAsync(id);
-        if (categoria == null)
-            return false;
-
-        _context.Categoria.Remove(categoria);
-        return await _context.SaveChangesAsync() > 0;
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.Categoria
+            .Where(criterio)
+            .AsNoTracking()
+            .ToListAsync();
     }
 }
