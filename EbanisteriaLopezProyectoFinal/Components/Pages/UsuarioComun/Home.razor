@@ -4,7 +4,7 @@
 @using Microsoft.AspNetCore.Authorization
 @inject AuthenticationStateProvider AuthenticationStateProvider
 @inject NavigationManager NavigationManager
-@inject ProductoServices ProductoServices
+@inject ProductoService ProductoService
 @inject IJSRuntime JSRuntime
 
 
@@ -218,7 +218,7 @@
                             <div class="project-item position-relative ratio ratio-1x1 overflow-hidden" style="cursor:pointer" @onclick="() => NavigateToProductDetails(producto.ProductoId)">
                                 @if (producto.Imagenes != null && producto.Imagenes.Any())
                                 {
-                                    <img src="@producto.Imagenes.OrderBy(img => img.Orden).First().Url" alt="@producto.Nombre" class="img-fluid project-img" style="object-fit: cover;" />
+                                    <img src="@producto.Imagenes.OrderBy(img => img.Orden).First().UrlImagen" alt="@producto.Nombre" class="img-fluid project-img" style="object-fit: cover;" />
                                 }
                                 else
                                 {
@@ -306,7 +306,7 @@
     protected override async Task OnInitializedAsync()
     {
         
-        productos = await ProductoServices.Listar(p => p.EstadoProductoId == 1);
+        productos = await ProductoService.Listar(p => p.EstadoProductoId == 1);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
