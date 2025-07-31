@@ -1,6 +1,6 @@
 ﻿@page "/store"
 @using EbanisteriaLopezProyectoFinal.Components.Services
-@inject ProductoServices ProductoServices
+@inject ProductoService ProductoService
 @inject CarritoService CarritoService
 @inject IJSRuntime JSRuntime
 
@@ -60,7 +60,7 @@
             {
                 @foreach (var product in FilteredProducts)
                 {
-                    var mainImage = product.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.Url ?? "/imagenes/no-image.jpg";
+                    var mainImage = product.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.UrlImagen ?? "/imagenes/no-image.jpg";
                     <div class="col-12 col-sm-6 col-md-4 col-lg-3">
                         <div class="card h-100 shadow-sm">
                             <img src="@mainImage" class="card-img-top" alt="@product.Detalle?.Descripcion" style="height: 200px; object-fit: cover;" />
@@ -70,9 +70,12 @@
                                 <span class="text-primary fw-bold mb-2">@product.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</span>
                                 <div class="mt-auto d-flex justify-content-between">
                                     <button class="btn btn-outline-primary btn-sm" @onclick="() => AddToCart(product.ProductoId)">Añadir</button>
+                                    <a href="/producto/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Ver Detalles</a>
+
                                     <AuthorizeView Roles="Admin">
                                         <Authorized>
-                                            <a href="/admin/products/edit/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Editar</a>
+                                            <a href="/admin/productos/editar/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Editar</a>
+
                                         </Authorized>
                                         <NotAuthorized>
                                         </NotAuthorized>
@@ -98,7 +101,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        AllProducts = await ProductoServices.Listar(p => true);
+        AllProducts = await ProductoService.Listar(p => true);
         AvailableCategories = AllProducts
             .Where(p => p.Categoria != null)
             .Select(p => p.Categoria!.Nombre)
