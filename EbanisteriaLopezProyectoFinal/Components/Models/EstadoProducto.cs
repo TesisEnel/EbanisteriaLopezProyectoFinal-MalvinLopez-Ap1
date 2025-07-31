@@ -9,4 +9,6 @@ public class EstadoProducto
     public string Nombre { get; set; } = string.Empty;
 
     public List<Producto> Productos { get; set; } = new();
+
+   
 }
