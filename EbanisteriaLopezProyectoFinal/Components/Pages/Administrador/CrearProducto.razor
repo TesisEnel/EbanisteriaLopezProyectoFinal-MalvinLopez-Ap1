@@ -1,111 +1,118 @@
-﻿@page "/admin/productos/create"
+﻿@page "/admin/productos/crear"
 @attribute [Authorize(Roles = "Admin")]
+@using EbanisteriaLopezProyectoFinal.Components.Models
 @using EbanisteriaLopezProyectoFinal.Components.Services
-@using Blazored.Toast.Services
-@using Microsoft.EntityFrameworkCore;
-
-@inject ProductoServices ProductoServices
+@inject ProductoService ProductoService
 @inject CategoriaServices CategoriaServices
+@inject SupabaseStorageService SupabaseStorage
 @inject NavigationManager NavigationManager
-@inject SupabaseStorage SupabaseStorage
 @inject IToastService ToastService
 @inject AuthenticationStateProvider AuthenticationStateProvider
+
 @rendermode InteractiveServer
 
 <PageTitle>Crear Producto</PageTitle>
+
+<h3 class="mb-4">Crear nuevo producto</h3>
 
 <EditForm Model="@producto" OnValidSubmit="@Guardar">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-    <div class="titleCreate">
-        <h1>Crear nuevo producto</h1>
+
+    <div class="mb-3">
+        <label class="form-label">Título</label>
+        <InputText class="form-control" @bind-Value="producto.Nombre" />
     </div>
 
-    <div class="containerCreate">
-        <InputFile class="form-control text-secondary w-auto" OnChange="CargarArchivosSeleccionados" accept="image/*" multiple />
+ 
+    <div class="mb-3">
+        <label class="form-label">Precio</label>
+        <InputNumber class="form-control" @bind-Value="producto.Precio" />
+    </div>
 
+    
+    <div class="mb-3">
+        <label class="form-label">Categoría</label>
+        <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
+            <option value="">Seleccione una categoría</option>
+            @foreach (var categoria in categorias)
+            {
+                <option value="@categoria.CategoriaId">@categoria.Nombre</option>
+            }
+        </InputSelect>
+    </div>
+
+  
+    <div class="mb-3">
+        <label class="form-label">Estado Producto</label>
+        <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
+            <option value="">Seleccione un estado</option>
+            <option value="1">Disponible</option>
+            <option value="2">Agotado</option>
+            <option value="3">En espera</option>
+        </InputSelect>
+    </div>
+
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputTextArea class="form-control" @bind-Value="producto.Detalle.Descripcion" />
+    </div>
+
+ 
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Material</label>
+            <InputText class="form-control" @bind-Value="producto.Detalle.Material" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Color</label>
+            <InputText class="form-control" @bind-Value="producto.Detalle.Color" />
+        </div>
+        <div class="col-md-4 mb-3">
+            <label class="form-label">Dimensiones</label>
+            <InputText class="form-control" @bind-Value="producto.Detalle.Dimensiones" />
+        </div>
+    </div>
+
+    
+    <div class="mb-3">
+        <label class="form-label">Imágenes</label>
+        <InputFile OnChange="CargarArchivosSeleccionados" multiple accept="image/*" />
         @if (archivosSeleccionados.Count > 0)
         {
-            <div class="mt-2 text-success">
+            <div class="text-success mt-2">
                 @archivosSeleccionados.Count archivo(s) seleccionado(s)
             </div>
         }
+    </div>
 
 
-        <div class="containerForm mb-3">
-            <label class="form-label fs-5">Nombre</label>
-            <InputText class="form-control" @bind-Value="producto.Nombre" placeholder="Nombre del producto" />
-        </div>
-
-        <div class="containerForm mb-3">
-            <label class="form-label fs-5">Precio</label>
-            <InputNumber class="form-control" @bind-Value="producto.Precio" placeholder="Precio del producto" />
-        </div>
-
-        <div class="containerForm mb-3">
-            <label class="form-label fs-5">Categoría</label>
-            <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
-                <option value="">Seleccione una categoría</option>
-                @foreach (var cat in categorias)
-                {
-                    <option value="@cat.CategoriaId">@cat.Nombre</option>
-                }
-            </InputSelect>
-        </div>
-
-        <div class="containerForm mb-3">
-            <label class="form-label fs-5">Estado</label>
-            <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
-                <option value="">Seleccione un estado</option>
-                <option value="1">Disponible</option>
-                <option value="2">Agotado</option>
-            </InputSelect>
-        </div>
-
-        <div class="containerForm mb-3">
-            <label class="form-label fs-5">Descripción</label>
-            <InputTextArea class="form-control" @bind-Value="producto.Detalle!.Descripcion" placeholder="Descripción del producto" />
-        </div>
-
-        <div class="containerForm-row mb-3">
-            <div class="containerForm-half">
-                <label class="form-label fs-5">Material</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Material" placeholder="Material del producto" />
-            </div>
-            <div class="containerForm-half">
-                <label class="form-label fs-5">Color</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Color" placeholder="Color del producto" />
-            </div>
-            <div class="containerForm-half">
-                <label class="form-label fs-5">Dimensiones</label>
-                <InputText class="form-control" @bind-Value="producto.Detalle!.Dimensiones" placeholder="Ej. 100x50x30cm" />
-            </div>
-        </div>
-
-        <div class="container d-flex justify-content-center gap-2">
-            <a href="/admin/productos" class="btn btn-secondary">Volver</a>
-            <button type="submit" class="btn btn-primary">Guardar</button>
-        </div>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="/admin/productos" class="btn btn-secondary ms-2">Cancelar</a>
     </div>
 </EditForm>
 
 @code {
     private Producto producto = new()
-        {
-            Nombre = string.Empty,
-            Precio = 0,
-            CategoriaId = 0,
-            EstadoProductoId = 1,
-            Detalle = new ProductoDetalle()
-        };
+    {
+        Nombre = "",
+        Precio = 0,
+        CategoriaId = 0,
+        EstadoProductoId = 1, 
+        Detalle = new ProductoDetalle()
+    };
 
-    private List<IBrowserFile> archivosSeleccionados = new();
     private List<Categoria> categorias = new();
+    private List<IBrowserFile> archivosSeleccionados = new();
 
     protected override async Task OnInitializedAsync()
     {
+        // Obtener categorías
         categorias = await CategoriaServices.Listar(c => true);
+
         if (categorias.Any())
         {
             producto.CategoriaId = categorias.First().CategoriaId;
@@ -114,56 +121,64 @@
 
     private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
     {
-        archivosSeleccionados = e.GetMultipleFiles().ToList();
+        var archivos = e.GetMultipleFiles().ToList();
+
+        if (archivos.Count > 5)
+        {
+            ToastService.ShowWarning("Solo puedes seleccionar hasta 5 imágenes.");
+            archivosSeleccionados = archivos.Take(5).ToList(); 
+        }
+        else
+        {
+            archivosSeleccionados = archivos;
+        }
     }
+
 
     private async Task Guardar()
     {
         try
         {
-            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
+            var auth = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = auth.User;
             if (!user.Identity?.IsAuthenticated ?? true)
-                throw new InvalidOperationException("Usuario no autorizado.");
+            {
+                ToastService.ShowError("Debe iniciar sesión.");
+                return;
+            }
 
-            // Asegurarse de que la relación entre Producto y ProductoDetalle esté establecida
-            producto.Detalle.Producto = producto;
-
-            var guardado = await ProductoServices.Guardar(producto);
+        
+            var guardado = await ProductoService.Guardar(producto);
 
             if (guardado && archivosSeleccionados.Any())
             {
+               
                 var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
                 foreach (var url in urls)
                 {
                     var imagen = new ImagenProducto
-                        {
-                            ProductoId = producto.ProductoId,
-                            Url = url,
-                            Orden = urls.IndexOf(url) + 1
-                        };
-                    await ProductoServices.AgregarImagen(imagen);
+                    {
+                        ProductoId = producto.ProductoId,
+                        UrlImagen = url,
+                        Orden = urls.IndexOf(url) + 1
+                    };
+                    await ProductoService.AgregarImagen(imagen);
                 }
             }
 
             if (guardado)
             {
-                ToastService.ShowSuccess("Producto creado correctamente.");
-                NavigationManager.NavigateTo("/admin/home");
+                ToastService.ShowSuccess("Producto guardado correctamente.");
+                NavigationManager.NavigateTo("/admin/productos");
             }
             else
             {
                 ToastService.ShowError("Error al guardar el producto.");
             }
         }
-        catch (DbUpdateException dbEx)
-        {
-            var inner = dbEx.InnerException?.Message ?? dbEx.Message;
-            ToastService.ShowError($"Error en la base de datos: {inner}");
-        }
         catch (Exception ex)
         {
-            ToastService.ShowError($"Error general: {ex.Message}");
+            ToastService.ShowError($"Error: {ex.Message}");
         }
     }
 }
