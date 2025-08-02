@@ -22,6 +22,9 @@ builder.Services.AddScoped<CategoriaServices>();
 builder.Services.AddScoped<SupabaseStorageService>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddHttpClient<SupabaseStorageService>();
+builder.Services.AddScoped<CotizacionService>();
+builder.Services.AddScoped<ClienteService>();
+
 
 builder.Services.AddAuthentication(options =>
 {

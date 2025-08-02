@@ -16,6 +16,9 @@ namespace EbanisteriaLopezProyectoFinal.Data
         public DbSet<ImagenProducto> ImagenProducto { get; set; }
         public DbSet<Categoria> Categoria { get; set; }
         public DbSet<EstadoProducto> EstadoProducto { get; set; }
+        public DbSet<Cotizacion> Cotizacion { get; set; }
+        public DbSet<Contacto> Contactos { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

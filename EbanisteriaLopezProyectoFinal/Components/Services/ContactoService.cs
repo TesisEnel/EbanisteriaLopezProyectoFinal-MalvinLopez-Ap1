@@ -1,22 +1,37 @@
-﻿ using EbanisteriaLopezProyectoFinal.Components.Models;
-    
+﻿using EbanisteriaLopezProyectoFinal.Components.Models;
+using EbanisteriaLopezProyectoFinal.Data;
+using Microsoft.EntityFrameworkCore;
 
 namespace EbanisteriaLopezProyectoFinal.Components.Services;
 
-
-
-public class ContactoService : IContactoService
+public class ContactoService(IDbContextFactory<ApplicationDbContext> dbContextFactory)
 {
-    public async Task EnviarFormularioAsync(ContactFormModel form)
+    public async Task<Contacto> ObtenerAsync()
     {
-        await Task.Delay(500);
+        await using var contexto = await dbContextFactory.CreateDbContextAsync();
+        return await contexto.Contactos.FirstOrDefaultAsync() ?? new Contacto();
+    }
 
-        Console.WriteLine("📬 Nuevo mensaje de contacto recibido:");
-        Console.WriteLine($"Nombre: {form.FirstName} {form.LastName}");
-        Console.WriteLine($"Correo: {form.Email}");
-        Console.WriteLine($"Teléfono: {form.Phone}");
-        Console.WriteLine($"Mensaje: {form.Message}");
+    public async Task<bool> GuardarAsync(Contacto contacto)
+    {
+        await using var contexto = await dbContextFactory.CreateDbContextAsync();
 
-       
+        var existente = await contexto.Contactos.FirstOrDefaultAsync();
+
+        if (existente is null)
+        {
+            contexto.Contactos.Add(contacto);
+        }
+        else
+        {
+            existente.Email = contacto.Email;
+            existente.Telefono = contacto.Telefono;
+            existente.HorarioSemana = contacto.HorarioSemana;
+            existente.HorarioSabado = contacto.HorarioSabado;
+            existente.Descripcion = contacto.Descripcion;
+            contexto.Contactos.Update(existente);
+        }
+
+        return await contexto.SaveChangesAsync() > 0;
     }
 }

@@ -3,6 +3,7 @@ using System;
 using EbanisteriaLopezProyectoFinal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250802025709_COTIZACION")]
+    partial class COTIZACION
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -55,9 +58,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<string>("Direccion")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<bool>("EstaResuelto")
-                        .HasColumnType("boolean");
 
                     b.Property<DateTime>("FechaSolicitud")
                         .HasColumnType("timestamp with time zone");
