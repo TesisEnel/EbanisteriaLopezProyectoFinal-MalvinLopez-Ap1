@@ -1,0 +1,140 @@
+﻿@page "/cotizaciones/solicitar/{ProductoId:int?}"
+
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject CotizacionService CotizacionService
+@inject ProductoService ProductoService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Crear Cotización</PageTitle>
+
+<h3 class="mb-4">Crear nueva cotización</h3>
+
+<EditForm Model="@cotizacion" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-value="cotizacion.Nombre" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Dirección</label>
+                <InputText class="form-control" @bind-value="cotizacion.Direccion" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Teléfono</label>
+                <InputText class="form-control" @bind-value="cotizacion.Telefono" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Correo Electrónico</label>
+                <InputText class="form-control" @bind-value="cotizacion.Correo" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Producto a Cotizar</label>
+                <InputSelect class="form-select" @bind-value="cotizacion.ProductoId" @onchange="OnProductoChanged">
+                    <option value="">Seleccione un producto</option>
+                    @foreach (var producto in productos)
+                    {
+                        <option value="@producto.ProductoId">@producto.Nombre</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a href="/admin/cotizaciones" class="btn btn-secondary ms-2">Cancelar</a>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            @if (imagenProductoSeleccionado != null)
+            {
+                <img src="@imagenProductoSeleccionado" class="img-fluid rounded shadow-sm" style="max-height: 350px; object-fit: cover;" />
+            }
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? ProductoId { get; set; }
+
+    private Cotizacion cotizacion = new();
+    private List<Producto> productos = new();
+    private string? imagenProductoSeleccionado;
+
+    protected override async Task OnInitializedAsync()
+    {
+        productos = await ProductoService.Listar(p => true);
+
+        if (ProductoId.HasValue)
+        {
+            cotizacion.ProductoId = ProductoId.Value;
+        }
+        else if (productos.Any())
+        {
+            cotizacion.ProductoId = productos.First().ProductoId;
+        }
+
+        await ActualizarImagen();
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            cotizacion.FechaSolicitud = DateTime.UtcNow;
+
+            var guardado = await CotizacionService.Insertar(cotizacion);
+
+            if (guardado)
+            {
+                ToastService.ShowSuccess("Cotización guardada correctamente.");
+                NavigationManager.NavigateTo("/admin/cotizaciones");
+            }
+            else
+            {
+                ToastService.ShowError("Error al guardar la cotización.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error: {ex.Message}");
+            if (ex.InnerException != null)
+            {
+                ToastService.ShowError($"Detalle: {ex.InnerException.Message}");
+            }
+        }
+    }
+
+    private async Task ActualizarImagen()
+    {
+        var productoSeleccionado = productos.FirstOrDefault(p => p.ProductoId == cotizacion.ProductoId);
+        imagenProductoSeleccionado = productoSeleccionado?.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.UrlImagen ?? "/imagenes/no-image.jpg";
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await ActualizarImagen();
+    }
+
+    private async Task OnProductoChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int id))
+        {
+            cotizacion.ProductoId = id;
+            await ActualizarImagen();
+        }
+    }
+
+}
