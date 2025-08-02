@@ -1,0 +1,136 @@
+﻿@page "/admin/cotizaciones/ver/{CotizacionId:int}"
+@attribute [Authorize(Roles = "Admin")]
+
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject CotizacionService CotizacionService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Ver Cotización</PageTitle>
+
+@if (cotizacion == null)
+{
+    <div class="text-center">
+        <div class="spinner-border text-primary"></div>
+        <p>Cargando cotización...</p>
+    </div>
+}
+else
+{
+    <div class="container py-5">
+        <h3 class="mb-4">Detalle de Cotización</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="mb-2">
+                    <strong>Nombre:</strong> @cotizacion.Nombre
+                </div>
+                <div class="mb-2">
+                    <strong>Dirección:</strong> @cotizacion.Direccion
+                </div>
+                <div class="mb-2">
+                    <strong>Teléfono:</strong> @cotizacion.Telefono
+                </div>
+                <div class="mb-2">
+                    <strong>Correo:</strong> @cotizacion.Correo
+                </div>
+                <div class="mb-2">
+                    <strong>Producto Solicitado:</strong> @cotizacion.Producto?.Nombre
+                </div>
+                <div class="mb-2">
+                    <strong>Fecha de Solicitud:</strong> @cotizacion.FechaSolicitud.ToString("dd/MM/yyyy")
+                </div>
+                <div class="mb-2">
+                    <strong>Estado:</strong>
+                    @if (cotizacion.EstaResuelto)
+                    {
+                        <span class="badge bg-success">Resuelto</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-warning text-dark">Incompleto</span>
+                    }
+                </div>
+
+                <div class="mt-4 d-flex gap-2">
+                    @if (!cotizacion.EstaResuelto)
+                    {
+                        <button class="btn btn-success" @onclick="MarcarComoResuelto">Marcar como Resuelto</button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-warning" @onclick="MarcarComoIncompleto">Marcar como Incompleto</button>
+                    }
+                    <a href="/admin/cotizaciones" class="btn btn-secondary">Volver</a>
+                </div>
+            </div>
+
+            <div class="col-md-6 text-center">
+                @if (!string.IsNullOrEmpty(imagenProducto))
+                {
+                    <img src="@imagenProducto"
+                         class="img-fluid rounded shadow-sm"
+                         style="max-height: 400px; object-fit: cover;"
+                         alt="Imagen del producto" />
+                }
+                else
+                {
+                    <p class="text-muted fst-italic">Sin imagen del producto.</p>
+                }
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public int CotizacionId { get; set; }
+
+    private Cotizacion? cotizacion;
+    private string imagenProducto = "/imagenes/no-image.jpg";
+
+    protected override async Task OnInitializedAsync()
+    {
+        cotizacion = await CotizacionService.Buscar(CotizacionId);
+
+        if (cotizacion?.Producto?.Imagenes?.Any() == true)
+        {
+            imagenProducto = cotizacion.Producto.Imagenes
+                .OrderBy(i => i.Orden)
+                .FirstOrDefault()?.UrlImagen ?? imagenProducto;
+        }
+    }
+
+    private async Task MarcarComoResuelto()
+    {
+        if (cotizacion != null)
+        {
+            cotizacion.EstaResuelto = true;
+            await GuardarEstado("resuelta");
+        }
+    }
+
+    private async Task MarcarComoIncompleto()
+    {
+        if (cotizacion != null)
+        {
+            cotizacion.EstaResuelto = false;
+            await GuardarEstado("marcada como incompleta");
+        }
+    }
+
+    private async Task GuardarEstado(string mensaje)
+    {
+        var exito = await CotizacionService.Actualizar(cotizacion);
+        if (exito)
+        {
+            ToastService.ShowSuccess($"Cotización {mensaje} correctamente.");
+            NavigationManager.NavigateTo("/admin/cotizaciones", true);
+        }
+        else
+        {
+            ToastService.ShowError("No se pudo actualizar la cotización.");
+        }
+    }
+}
