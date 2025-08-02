@@ -1,0 +1,82 @@
+﻿@page "/admin/cotizaciones"
+@attribute [Authorize(Roles = "Admin")]
+
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject CotizacionService CotizacionService
+@inject NavigationManager NavigationManager
+
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Cotizaciones</PageTitle>
+
+<div class="container py-5">
+    <h2 class="mb-4">Cotizaciones Recibidas</h2>
+
+    @if (cotizaciones == null)
+    {
+        <div class="text-center">
+            <div class="spinner-border text-primary"></div>
+            <p>Cargando cotizaciones...</p>
+        </div>
+    }
+    else if (!cotizaciones.Any())
+    {
+        <div class="alert alert-info text-center">
+            No hay cotizaciones disponibles en este momento.
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Nombre</th>
+                        <th>Producto</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in cotizaciones)
+                    {
+                        <tr>
+                            <td>@c.CotizacionId</td>
+                            <td>@c.Nombre</td>
+                            <td>@c.Producto?.Nombre</td>
+                            <td>@c.FechaSolicitud.ToString("dd/MM/yyyy")</td>
+                            <td>
+                                @if (c.EstaResuelto)
+                                {
+                                    <span class="badge bg-success">Resuelto</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Incompleto</span>
+                                }
+                            </td>
+                            <td>
+                                <a class="btn btn-sm btn-primary"
+                                   href="/admin/cotizaciones/ver/@c.CotizacionId">
+                                    Ver
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Cotizacion>? cotizaciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        cotizaciones = await CotizacionService.Listar();
+    }
+}
