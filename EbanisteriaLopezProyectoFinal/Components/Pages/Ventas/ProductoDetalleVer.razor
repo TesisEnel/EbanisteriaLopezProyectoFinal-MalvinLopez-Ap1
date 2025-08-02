@@ -4,6 +4,7 @@
 @inject ProductoService ProductoService
 @inject CarritoService CarritoService
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
 
 <PageTitle>Detalles del Producto</PageTitle>
 
@@ -18,9 +19,11 @@ else
 {
     <div class="container py-5">
         <div class="row">
-           
             <div class="col-md-6">
-                <img src="@mainImage" class="img-fluid mb-3 rounded shadow-sm" alt="@producto.Detalle?.Descripcion" style="max-height:400px; object-fit:cover;" />
+                <img src="@mainImage"
+                     class="img-fluid mb-3 rounded shadow-sm"
+                     alt="@producto.Detalle?.Descripcion"
+                     style="max-height:400px; object-fit:cover;" />
 
                 @if (producto.Imagenes?.Count > 1)
                 {
@@ -40,12 +43,19 @@ else
             <div class="col-md-6">
                 <h2>@producto.Nombre</h2>
                 <p class="text-muted">@producto.Detalle?.Material</p>
-                <p class="text-primary fw-bold">@producto.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</p>
+                <p class="text-primary fw-bold">
+                    @producto.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))
+                </p>
                 <p>@producto.Detalle?.Descripcion</p>
 
                 <div class="mt-4">
-                    <button class="btn btn-outline-primary btn-lg" @onclick="AddToCart">Añadir al carrito</button>
-                    <button class="btn btn-outline-secondary btn-lg ms-3" @onclick="SolicitarCotizacion">Solicitar cotización</button>
+                    <button class="btn btn-outline-primary btn-lg" @onclick="AddToCart">
+                        Añadir al carrito
+                    </button>
+                   <a class="btn btn-outline-secondary btn-lg ms-3" href="/cotizaciones/solicitar/@producto.ProductoId">
+    Solicitar cotización
+</a>
+
                 </div>
             </div>
         </div>
@@ -84,6 +94,9 @@ else
 
     private void SolicitarCotizacion()
     {
-        JSRuntime.InvokeVoidAsync("alert", $"Solicitar cotización para: {producto?.Detalle?.Descripcion}");
+        if (producto != null)
+        {
+            NavigationManager.NavigateTo($"/cotizaciones/solicitar/{producto.ProductoId}");
+        }
     }
 }
