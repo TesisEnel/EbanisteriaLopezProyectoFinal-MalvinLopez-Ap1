@@ -1,0 +1,66 @@
+﻿@page "/admin/gestion-productos"
+@attribute [Authorize(Roles = "Admin")]
+
+<PageTitle>Gestión de Productos</PageTitle>
+
+<div class="admin-wrapper py-5">
+    <div class="container admin-container bg-white shadow-lg p-4 p-lg-5 rounded-3">
+        <div class="text-center mb-5 pb-3 border-bottom">
+            <h1 class="display-5 fw-bold text-dark">
+                <i class="bi bi-box-seam me-3 text-primary"></i>Gestión de Productos
+            </h1>
+            <p class="lead text-secondary">Accede rápidamente a las acciones clave relacionadas con productos y categorías.</p>
+        </div>
+
+        <div class="row g-4 text-center">
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm border-primary h-100">
+                    <div class="card-body">
+                        <i class="bi bi-plus-square display-4 text-primary mb-3"></i>
+                        <h5 class="card-title fw-bold">Crear Producto</h5>
+                        <p class="text-muted">Agrega un nuevo producto al catálogo.</p>
+                        <a href="/admin/productos/crear" class="btn btn-primary w-100">
+                            Ir <i class="bi bi-arrow-right-circle ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm border-success h-100">
+                    <div class="card-body">
+                        <i class="bi bi-pencil-square display-4 text-success mb-3"></i>
+                        <h5 class="card-title fw-bold">Editar Producto</h5>
+                        <p class="text-muted">Modifica productos existentes en el sistema.</p>
+                        <a href="/admin/productos/editar" class="btn btn-success w-100">
+                            Ir <i class="bi bi-arrow-right-circle ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm border-danger h-100">
+                    <div class="card-body">
+                        <i class="bi bi-trash3 display-4 text-danger mb-3"></i>
+                        <h5 class="card-title fw-bold">Eliminar Producto</h5>
+                        <p class="text-muted">Elimina productos que ya no están disponibles.</p>
+                        <a href="/admin/productos/eliminar" class="btn btn-danger w-100">
+                            Ir <i class="bi bi-arrow-right-circle ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="card shadow-sm border-info h-100">
+                    <div class="card-body">
+                        <i class="bi bi-tags display-4 text-info mb-3"></i>
+                        <h5 class="card-title fw-bold">Crear Categoría</h5>
+                        <p class="text-muted">Organiza tus productos en categorías.</p>
+                        <a href="/admin/categorias" class="btn btn-info w-100">
+                            Ir <i class="bi bi-arrow-right-circle ms-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
