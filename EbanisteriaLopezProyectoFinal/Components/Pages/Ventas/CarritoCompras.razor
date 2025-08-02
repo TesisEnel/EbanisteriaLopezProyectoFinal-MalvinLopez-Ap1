@@ -1,0 +1,97 @@
+﻿@page "/cart"
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject CarritoService CarritoService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Carrito de Compras</PageTitle>
+
+<section class="container py-5">
+    <h2 class="mb-4 text-center">🛒 Carrito de Compras</h2>
+
+    @if (Items.Count == 0)
+    {
+        <div class="alert alert-info text-center">
+            Tu carrito está vacío.
+            <br />
+            <a href="/store" class="btn btn-sm btn-primary mt-2">Ir a la tienda</a>
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-striped align-middle">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Producto</th>
+                        <th>Descripción</th>
+                        <th class="text-center">Cantidad</th>
+                        <th class="text-end">Precio</th>
+                        <th class="text-end">Total</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Items)
+                    {
+                        <tr>
+                            <td style="width: 80px;">
+                                <img src="@item.Producto.Imagenes?.OrderBy(i => i.Orden).FirstOrDefault()?.UrlImagen?? " /imagenes/no-image.jpg"" alt="imagen" class="img-fluid rounded" style="height: 60px; object-fit: cover;" />
+                            </td>
+                            <td>@item.Producto.Detalle?.Descripcion</td>
+                            <td class="text-center">@item.Cantidad</td>
+                            <td class="text-end">@item.Producto.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</td>
+                            <td class="text-end">@((item.Producto.Precio * item.Cantidad).ToString("C", new System.Globalization.CultureInfo("es-DO")))</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-danger" @onclick="() => Eliminar(item.Producto.ProductoId)">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="/store" class="btn btn-outline-secondary">← Seguir comprando</a>
+            <h4>Total: @TotalGeneral.ToString("C", new System.Globalization.CultureInfo("es-DO"))</h4>
+        </div>
+
+        <div class="text-end mt-3">
+            <button class="btn btn-success" @onclick="FinalizarCompra">Finalizar Compra</button>
+        </div>
+    }
+</section>
+
+@code {
+    private List<CarritoItem> Items = new();
+    private decimal TotalGeneral => Items.Sum(i => i.Producto.Precio * i.Cantidad);
+
+    protected override void OnInitialized()
+    {
+        Items = CarritoService.GetItems().ToList();
+        CarritoService.OnChange += Refrescar;
+    }
+
+    private void Refrescar()
+    {
+        Items = CarritoService.GetItems().ToList();
+        StateHasChanged();
+    }
+
+    private void Eliminar(int productoId)
+    {
+        CarritoService.QuitarProducto(productoId);
+    }
+
+    private void FinalizarCompra()
+    {
+       
+        NavigationManager.NavigateTo("/checkout");
+    }
+
+    public void Dispose()
+    {
+        CarritoService.OnChange -= Refrescar;
+    }
+}
