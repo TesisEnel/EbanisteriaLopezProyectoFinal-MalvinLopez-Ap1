@@ -125,7 +125,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        categorias = await CategoriaServices.Listar(c => true);
+      
 
         producto = await ProductoService.Buscar(ProductoId);
 
