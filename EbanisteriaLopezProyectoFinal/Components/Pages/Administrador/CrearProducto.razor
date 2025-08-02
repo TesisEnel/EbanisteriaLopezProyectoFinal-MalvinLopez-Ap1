@@ -110,14 +110,14 @@
 
     protected override async Task OnInitializedAsync()
     {
-        // Obtener categorías
-        categorias = await CategoriaServices.Listar(c => true);
+        categorias = await CategoriaServices.Listar();
 
         if (categorias.Any())
         {
             producto.CategoriaId = categorias.First().CategoriaId;
         }
     }
+
 
     private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
     {
