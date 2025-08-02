@@ -1,0 +1,107 @@
+﻿@page "/admin/clientes"
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@attribute [Authorize(Roles = "Admin")]
+@inject ClienteService ClienteService
+@inject IToastService ToastService
+@inject IJSRuntime JS
+
+<PageTitle>Clientes Registrados</PageTitle>
+
+<h3>Clientes Registrados</h3>
+
+@if (clientes == null)
+{
+    <p><em>Cargando...</em></p>
+}
+else if (!clientes.Any())
+{
+    <p>No hay clientes registrados.</p>
+}
+else
+{
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Usuario</th>
+                <th>Teléfono</th>
+                <th>Email Confirmado</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cliente in clientes)
+            {
+                <tr>
+                    <td>@cliente.Email</td>
+                    <td>@cliente.UserName</td>
+                    <td>@cliente.PhoneNumber</td>
+                    <td>@(cliente.EmailConfirmed ? "Sí" : "No")</td>
+                    <td>
+                        @if (cliente.EstaBloqueado)
+                        {
+                            <span class="badge bg-danger">Bloqueado</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-success">Activo</span>
+                        }
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-1"
+                                @onclick="() => ToggleBloqueo(cliente.Id)">
+                            @(cliente.EstaBloqueado ? "Desbloquear" : "Bloquear")
+                        </button>
+                        <button class="btn btn-sm btn-danger"
+                                @onclick="() => EliminarCliente(cliente.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<ClienteDto>? clientes;
+
+    protected override async Task OnInitializedAsync()
+    {
+        clientes = await ClienteService.ObtenerClientesAsync();
+    }
+
+    private async Task ToggleBloqueo(string userId)
+    {
+        var resultado = await ClienteService.BloquearUsuarioAsync(userId);
+        if (resultado)
+        {
+            ToastService.ShowInfo("Estado de bloqueo actualizado.");
+            clientes = await ClienteService.ObtenerClientesAsync();
+        }
+        else
+        {
+            ToastService.ShowError("Ocurrió un error al actualizar el estado.");
+        }
+    }
+
+    private async Task EliminarCliente(string userId)
+    {
+        bool confirmado = await JS.InvokeAsync<bool>("confirm", $"¿Estás seguro que deseas eliminar este cliente?");
+        if (confirmado)
+        {
+            var resultado = await ClienteService.EliminarClienteAsync(userId);
+            if (resultado)
+            {
+                ToastService.ShowSuccess("Cliente eliminado.");
+                clientes = await ClienteService.ObtenerClientesAsync();
+            }
+            else
+            {
+                ToastService.ShowError("Error al eliminar el cliente.");
+            }
+        }
+    }
+}
