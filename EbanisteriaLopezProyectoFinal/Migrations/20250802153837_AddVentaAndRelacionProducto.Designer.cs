@@ -3,6 +3,7 @@ using System;
 using EbanisteriaLopezProyectoFinal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250802153837_AddVentaAndRelacionProducto")]
+    partial class AddVentaAndRelacionProducto
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -193,9 +196,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18, 2)");
 
-                    b.Property<int?>("VentaId")
-                        .HasColumnType("integer");
-
                     b.HasKey("ProductoId");
 
                     b.HasIndex("CategoriaId");
@@ -204,8 +204,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
                     b.HasIndex("Nombre")
                         .IsUnique();
-
-                    b.HasIndex("VentaId");
 
                     b.ToTable("Producto");
                 });
@@ -442,29 +440,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Venta", b =>
-                {
-                    b.Property<int>("VentaId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VentaId"));
-
-                    b.Property<DateTime>("Fecha")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<decimal>("Total")
-                        .HasColumnType("numeric");
-
-                    b.Property<string>("UsuarioId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("VentaId");
-
-                    b.ToTable("Ventas");
-                });
-
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Cotizacion", b =>
                 {
                     b.HasOne("EbanisteriaLopezProyectoFinal.Components.Models.Producto", "Producto")
@@ -498,10 +473,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .HasForeignKey("EstadoProductoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("Venta", null)
-                        .WithMany("Productos")
-                        .HasForeignKey("VentaId");
 
                     b.Navigation("Categoria");
 
@@ -585,11 +556,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Navigation("Detalle");
 
                     b.Navigation("Imagenes");
-                });
-
-            modelBuilder.Entity("Venta", b =>
-                {
-                    b.Navigation("Productos");
                 });
 #pragma warning restore 612, 618
         }
