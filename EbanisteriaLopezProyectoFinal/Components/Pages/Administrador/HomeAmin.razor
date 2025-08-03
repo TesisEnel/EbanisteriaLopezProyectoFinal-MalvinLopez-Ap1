@@ -3,6 +3,7 @@
 @inject ProductoService ProductoService
 @inject CotizacionService CotizacionService
 @inject ClienteService ClienteService
+@inject VentaService VentaService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
 
@@ -10,7 +11,6 @@
 
 <div class="admin-wrapper py-5">
     <div class="container admin-container bg-white shadow-lg p-4 p-lg-5 rounded-3">
-
         <AuthorizeView Roles="Admin">
             <Authorized>
                 <div class="admin-header text-center mb-5 pb-3 border-bottom">
@@ -39,7 +39,7 @@
                                 <i class="bi bi-receipt display-4 text-success mb-3"></i>
                                 <h5 class="card-title fw-bold text-dark">Pedidos</h5>
                                 <p class="card-text text-muted">Revisa y procesa todas las órdenes de tus clientes.</p>
-                                <a href="/admin/orders" class="btn btn-success mt-3 w-100">
+                                <a href="/admin/ventas" class="btn btn-success mt-3 w-100">
                                     Gestionar Pedidos <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>
@@ -63,13 +63,13 @@
                                 <i class="bi bi-sliders display-4 text-info mb-3"></i>
                                 <h5 class="card-title fw-bold text-dark">Ajustes</h5>
                                 <p class="card-text text-muted">Configura las opciones generales de tu tienda.</p>
-                                <a href="/admin/settings" class="btn btn-info mt-3 w-100">
+                                <a href="/admin/servicios" class="btn btn-info mt-3 w-100">
                                     Configuración <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>
                         </div>
                     </div>
-                   
+
                     <div class="col-md-6 col-lg-3">
                         <div class="admin-card card h-100 shadow-sm border-danger">
                             <div class="card-body text-center">
@@ -90,15 +90,15 @@
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="stat-box p-4 rounded-3 shadow-sm bg-light-primary">
                                 <i class="bi bi-bag-check display-5 text-primary mb-2"></i>
-                                <p class="mb-0 fw-bold h4 text-primary">15</p>
-                                <p class="text-muted small">Pedidos Pendientes</p>
+                                <p class="mb-0 fw-bold h4 text-primary">@totalVentas</p>
+                                <p class="text-muted small">Ventas Realizadas</p>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="stat-box p-4 rounded-3 shadow-sm bg-light-success">
                                 <i class="bi bi-box display-5 text-success mb-2"></i>
-                                <p class="mb-0 fw-bold h4 text-success">234</p>
-                                <p class="text-muted small">Productos en Stock</p>
+                                <p class="mb-0 fw-bold h4 text-success">@totalProductos</p>
+                                <p class="text-muted small">Productos Registrados</p>
                             </div>
                         </div>
                         <div class="col-sm-6 col-md-4 col-lg-3">
@@ -134,10 +134,14 @@
 @code {
     private int totalCotizaciones;
     private int totalClientes;
+    private int totalVentas;
+    private int totalProductos;
 
     protected override async Task OnInitializedAsync()
     {
         totalCotizaciones = await CotizacionService.ContarCotizaciones();
         totalClientes = await ClienteService.ContarClientesAsync();
+        totalVentas = await VentaService.ContarVentasAsync();
+        totalProductos = await ProductoService.ContarProductosAsync();
     }
 }
