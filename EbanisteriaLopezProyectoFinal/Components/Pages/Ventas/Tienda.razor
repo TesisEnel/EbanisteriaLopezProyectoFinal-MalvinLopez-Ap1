@@ -1,20 +1,44 @@
 ﻿@page "/store"
 @using EbanisteriaLopezProyectoFinal.Components.Services
+@using EbanisteriaLopezProyectoFinal.Components.Models
 @inject ProductoService ProductoService
 @inject CarritoService CarritoService
+@inject EstadoProductoService EstadoProductoService
 @inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
+
 
 <PageTitle>Tienda - Ebanisteria Lopez</PageTitle>
 
+
+
 <main>
+
+    
+
     <div class="position-relative d-flex flex-column justify-content-center align-items-center text-white"
          style="height: 50vh; max-height: 25rem; background-image:url('/imagenes/store-hero.jpg'); background-size: cover; background-position: center;">
+
+        <!-- Fondo oscuro -->
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="z-index: -1;"></div>
+
+        <!-- Botón Inicio mejorado -->
+        <a href="/"
+           class="btn btn-light btn-lg rounded-pill shadow-lg position-absolute m-3 d-flex align-items-center gap-2"
+           style="top: 0.5rem; left: 0.5rem; z-index: 10;">
+            <i class="bi bi-house-fill fs-5"></i>
+            <span class="fw-semibold">Inicio</span>
+        </a>
+
+        <!-- Contenido del hero -->
         <div class="container text-center py-5 position-relative z-1">
             <h1 class="display-4 fw-bold text-white mb-4">Nuestra Tienda</h1>
             <p class="lead mb-0">Encuentra piezas únicas de mobiliario y carpintería artesanal.</p>
         </div>
     </div>
+
+
+
 
     <section class="container py-5">
         <div class="row mb-4">
@@ -65,20 +89,44 @@
                         <div class="card h-100 shadow-sm">
                             <img src="@mainImage" class="card-img-top" alt="@product.Detalle?.Descripcion" style="height: 200px; object-fit: cover;" />
                             <div class="card-body d-flex flex-column">
-                                <h5 class="card-title">@product.Detalle?.Descripcion</h5>
-                                <p class="card-text text-muted">@product.Detalle?.Material</p>
-                                <span class="text-primary fw-bold mb-2">@product.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</span>
-                                <div class="mt-auto d-flex justify-content-between">
-                                    <button class="btn btn-outline-primary btn-sm" @onclick="() => AddToCart(product.ProductoId)">Añadir</button>
+                                <h6 class="fw-bold mb-1 text-truncate" title="@product.Detalle?.Descripcion">
+                                    Descripción: <span class="fw-normal">@product.Detalle?.Descripcion</span>
+                                </h6>
+                                <p class="text-muted mb-1 text-truncate" title="@product.Detalle?.Material">
+                                    <strong>Material:</strong> @product.Detalle?.Material
+                                </p>
+                                <p class="mb-1 text-primary fw-bold">
+                                    <strong>Precio:</strong> @product.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))
+                                </p>
+                                <p class="mb-1 text-muted">
+                                    <strong>Cantidad:</strong> @product.Cantidad
+                                </p>
+                                <p class="mb-2 text-muted text-truncate" title="@product.EstadoProducto?.Nombre">
+                                    <strong>Estado:</strong> @product.EstadoProducto?.Nombre
+                                </p>
+
+                                <div class="mt-auto d-flex flex-wrap gap-1">
+                                    @if (product.EstadoProducto?.Nombre?.ToLower() == "disponible")
+                                    {
+                                        <button class="btn btn-outline-primary btn-sm"
+                                                @onclick="() => AddToCart(product.ProductoId)">
+                                            Añadir
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-outline-warning btn-sm"
+                                           href="/cotizaciones/solicitar/@product.ProductoId">
+                                            Solicitar Cotización
+                                        </a>
+                                    }
+
                                     <a href="/producto/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Ver Detalles</a>
 
                                     <AuthorizeView Roles="Admin">
                                         <Authorized>
                                             <a href="/admin/productos/editar/@product.ProductoId" class="btn btn-outline-secondary btn-sm">Editar</a>
-
                                         </Authorized>
-                                        <NotAuthorized>
-                                        </NotAuthorized>
                                     </AuthorizeView>
                                 </div>
                             </div>
@@ -88,14 +136,13 @@
             }
         </div>
     </section>
-    
-
 </main>
 
 @code {
     private List<Producto>? AllProducts;
     private List<Producto>? FilteredProducts;
     private List<string> AvailableCategories = new();
+    private List<EstadoProducto> Estados = new();
 
     private string SearchTerm = string.Empty;
     private string SelectedCategory = string.Empty;
@@ -104,6 +151,8 @@
     protected override async Task OnInitializedAsync()
     {
         AllProducts = await ProductoService.Listar(p => true);
+        Estados = await EstadoProductoService.Listar();
+
         AvailableCategories = AllProducts
             .Where(p => p.Categoria != null)
             .Select(p => p.Categoria!.Nombre)
@@ -149,7 +198,6 @@
         var producto = AllProducts?.FirstOrDefault(p => p.ProductoId == productoId);
         if (producto != null)
         {
-            // Agregar el producto al carrito
             CarritoService.AgregarProducto(producto, 1);
             JSRuntime.InvokeVoidAsync("alert", $"Producto añadido: {producto.Detalle?.Descripcion}");
         }
