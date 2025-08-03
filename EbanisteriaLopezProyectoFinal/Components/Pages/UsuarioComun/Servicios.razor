@@ -1,0 +1,44 @@
+﻿@page "/servicios"
+@inject ServicioService ServicioService
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+
+<PageTitle>Servicios</PageTitle>
+
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Nuestros Servicios</h2>
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+            @if (servicios?.Any() == true)
+            {
+                @foreach (var servicio in servicios)
+                {
+                    <div class="col">
+                        <div class="card h-100 border-0 shadow-sm text-center">
+                            <div class="card-body">
+                                <i class="@servicio.Icono display-4 text-primary mb-3"></i>
+                                <h5 class="card-title">@servicio.Titulo</h5>
+                                <p class="card-text">@servicio.Descripcion</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col text-center">
+                    <p class="text-muted">No hay servicios disponibles por el momento.</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+@code {
+    private List<Servicio> servicios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        servicios = await ServicioService.Listar(s => true);
+    }
+}
