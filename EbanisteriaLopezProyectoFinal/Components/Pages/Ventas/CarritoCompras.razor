@@ -2,77 +2,129 @@
 @using EbanisteriaLopezProyectoFinal.Components.Services
 @inject CarritoService CarritoService
 @inject NavigationManager NavigationManager
+@rendermode InteractiveServer
 
-<PageTitle>Carrito de Compras</PageTitle>
+<div class="container my-5">
+    <h2 class="mb-4 text-center">Tu Carrito de Compras</h2>
+    <hr class="mb-5" />
 
-<section class="container py-5">
-    <h2 class="mb-4 text-center">🛒 Carrito de Compras</h2>
-
-    @if (Items.Count == 0)
+    @if (!CarritoService.ObtenerItems().Any())
     {
-        <div class="alert alert-info text-center">
-            Tu carrito está vacío.
+        <div class="alert alert-info text-center" role="alert">
+            <h4 class="alert-heading">¡Tu carrito está vacío!</h4>
+            <p>Parece que no has añadido ningún producto a tu carrito todavía. ¡Explora nuestra tienda y encuentra los muebles perfectos para ti!</p>
+            <hr>
+            <a href="/" class="btn btn-primary mt-3">Ver Productos</a>
         </div>
     }
     else
     {
-        <table class="table table-bordered align-middle">
-            <thead class="table-light">
-                <tr>
-                    <th>Producto</th>
-                    <th>Precio</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Items)
+        <div class="row">
+            <div class="col-lg-8">
+                @foreach (var item in CarritoService.ObtenerItems())
                 {
-                    <tr>
-                        <td>@item.Producto.Detalle?.Descripcion</td>
-                        <td>@item.Producto.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</td>
-                        <td>@item.Cantidad</td>
-                        <td>@(item.Cantidad* item.Producto.Precio).ToString("C", new System.Globalization.CultureInfo("es-DO"))</td>
-                        <td>
-                            <button class="btn btn-sm btn-danger" @onclick="@(() => Eliminar(item.Producto.ProductoId))">Eliminar</button>
-                        </td>
-                    </tr>
+                    <div class="card mb-3 shadow-sm">
+                        <div class="row g-0 align-items-center">
+                            <div class="col-md-3 p-3">
+                                <img src="@(item.Producto.Imagenes?.FirstOrDefault()?.UrlImagen ?? "/imagenes/no-image.jpg")"
+                                     class="img-fluid rounded-start cart-item-img"
+                                     alt="@item.Producto.Detalle?.Descripcion">
+                            </div>
+                            <div class="col-md-9">
+                                <div class="card-body">
+                                    <h5 class="card-title mb-1">@item.Producto.Detalle?.Descripcion</h5>
+                                    <p class="card-text text-muted mb-2"><small>Material: @item.Producto.Detalle?.Material</small></p>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <p class="card-text fw-bold me-3 mb-0" style="font-size: 1.25rem;">@item.Producto.Precio.ToString("C", new System.Globalization.CultureInfo("es-DO"))</p>
+                                        <div class="input-group input-group-sm w-auto me-3">
+                                            <label for="cantidad-@item.Producto.ProductoId" class="visually-hidden">Cantidad</label>
+                                            <input type="number" id="cantidad-@item.Producto.ProductoId" class="form-control form-control-sm text-center" min="1" value="@item.Cantidad"
+                                                   @onchange="(e) => OnCantidadCambiada(e, item.Producto.ProductoId)" style="width: 60px;" />
+                                        </div>
+                                        <p class="card-text mb-0">Total: <span class="fw-bold">@((item.Producto.Precio * item.Cantidad).ToString("C", new System.Globalization.CultureInfo("es-DO")))</span></p>
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm" @onclick="() => Eliminar(item.Producto.ProductoId)">
+                                        <i class="bi bi-trash"></i> Eliminar
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 }
-            </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="3" class="text-end fw-bold">Total:</td>
-                    <td colspan="2" class="fw-bold">
-                        @Items.Sum(i => i.Producto.Precio * i.Cantidad).ToString("C", new System.Globalization.CultureInfo("es-DO"))
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
+            </div>
 
-        <div class="text-end">
-            <button class="btn btn-secondary me-2" @onclick="Vaciar">Vaciar carrito</button>
-            <button class="btn btn-primary" @onclick="IrAPagar">Ir a pagar</button>
+            <div class="col-lg-4">
+                <div class="card shadow-sm sticky-top" style="top: 20px;">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Resumen del Carrito</h4>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                Subtotal:
+                                <span>@CarritoService.ObtenerItems().Sum(item => item.Producto.Precio * item.Cantidad).ToString("C", new System.Globalization.CultureInfo("es-DO"))</span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between align-items-center text-success fw-bold">
+                                Total:
+                                <span>@CarritoService.ObtenerItems().Sum(item => item.Producto.Precio * item.Cantidad).ToString("C", new System.Globalization.CultureInfo("es-DO"))</span>
+                            </li>
+                        </ul>
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-lg" @onclick="RealizarCompra">
+                                <i class="bi bi-credit-card"></i> Proceder al Pago
+                            </button>
+                            <button class="btn btn-outline-danger btn-sm" @onclick="Vaciar">
+                                <i class="bi bi-x-circle"></i> Vaciar Carrito
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     }
-</section>
+</div>
 
 @code {
-    private IReadOnlyList<CarritoItem> Items => CarritoService.ObtenerItems();
-
     private void Eliminar(int productoId)
     {
         CarritoService.EliminarDelCarrito(productoId);
+        StateHasChanged();
     }
 
     private void Vaciar()
     {
         CarritoService.VaciarCarrito();
+        StateHasChanged();
     }
 
-    private void IrAPagar()
+    private void RealizarCompra()
     {
-        // Aquí podrías redirigir a una página de checkout o mostrar un modal
         NavigationManager.NavigateTo("/checkout");
     }
+
+    private void OnCantidadCambiada(ChangeEventArgs e, int productoId)
+    {
+        if (int.TryParse(e?.Value?.ToString(), out int cantidad))
+        {
+            if (cantidad < 1) cantidad = 1; // Asegura que la cantidad sea al menos 1
+            CarritoService.CambiarCantidad(productoId, cantidad);
+            StateHasChanged();
+        }
+    }
 }
+
+<style>
+    .cart-item-img {
+        width: 100%;
+        height: 150px; /* Altura fija para consistencia */
+        object-fit: contain; /* Asegura que la imagen completa sea visible */
+        padding: 10px;
+        background-color: #f8f9fa; /* Fondo claro para las imágenes */
+    }
+
+    .card {
+        border: none; /* Eliminar borde de tarjeta predeterminado */
+    }
+
+    .list-group-item span {
+        font-size: 1.1rem;
+    }
+</style>
