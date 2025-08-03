@@ -1,0 +1,84 @@
+﻿@page "/galeria"
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject ProductoService ProductoService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Galería</PageTitle>
+
+<main>
+    <!-- Hero de la galería -->
+    <div class="position-relative d-flex flex-column justify-content-center align-items-center text-white"
+         style="height: 40vh; background-image:url('/imagenes/gallery-hero.jpg'); background-size: cover; background-position: center;">
+
+        <!-- Fondo oscuro -->
+        <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="z-index: -1;"></div>
+
+        <!-- Botón Inicio -->
+        <a href="/"
+           class="btn btn-light btn-lg rounded-pill shadow-lg position-absolute m-3 d-flex align-items-center gap-2"
+           style="top: 0.5rem; left: 0.5rem; z-index: 10;">
+            <i class="bi bi-house-fill fs-5"></i>
+            <span class="fw-semibold">Inicio</span>
+        </a>
+
+        <!-- Texto central -->
+        <div class="container text-center py-4 position-relative z-1">
+            <h1 class="display-5 fw-bold text-white mb-2">Galería de Productos</h1>
+            <p class="lead mb-0">Explora todas nuestras piezas artesanales en imágenes</p>
+        </div>
+    </div>
+
+    <!-- Galería -->
+    <section class="container py-5">
+        @if (Productos == null)
+        {
+            <div class="text-center">
+                <div class="spinner-border text-primary"></div>
+                <p>Cargando imágenes...</p>
+            </div>
+        }
+        else if (!Productos.Any())
+        {
+            <div class="text-center">
+                <p>No hay productos disponibles.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-3">
+                @foreach (var producto in Productos)
+                {
+                    if (producto.Imagenes != null)
+                    {
+                        foreach (var imagen in producto.Imagenes)
+                        {
+                            <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                                <a @onclick="@(() => IrADetalle(producto.ProductoId))" style="cursor: pointer;">
+                                    <img src="@imagen.UrlImagen"
+                                         class="img-fluid rounded shadow-sm"
+                                         style="height: 150px; object-fit: cover; width: 100%;"
+                                         alt="Imagen de @producto.Detalle?.Descripcion" />
+                                </a>
+                            </div>
+                        }
+                    }
+                }
+            </div>
+        }
+    </section>
+</main>
+
+@code {
+    private List<Producto>? Productos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Productos = await ProductoService.Listar(p => true);
+    }
+
+    private void IrADetalle(int productoId)
+    {
+        NavigationManager.NavigateTo($"/producto/{productoId}");
+    }
+}
