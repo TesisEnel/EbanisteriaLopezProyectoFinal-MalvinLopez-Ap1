@@ -20,8 +20,10 @@ namespace EbanisteriaLopezProyectoFinal.Data
         public DbSet<Contacto> Contactos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<Servicio> Servicio { get; set; }
-        
-        
+        public DbSet<VentaItem> VentaItems { get; set; }
+
+
+
 
 
 

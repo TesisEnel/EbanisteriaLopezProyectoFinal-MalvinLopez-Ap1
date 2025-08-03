@@ -6,6 +6,7 @@
 @inject NavigationManager NavigationManager
 @inject ProductoService ProductoService
 @inject IJSRuntime JSRuntime
+@rendermode InteractiveServer
 
 
 <PageTitle>Inicio - Ebanisteria Lopez</PageTitle>
@@ -61,7 +62,6 @@
 
                     <AuthorizeView>
                         <Authorized>
-                            
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="miCuentaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                                     Mi Cuenta
@@ -72,6 +72,12 @@
                                     </li>
                                     <li>
                                         <a class="dropdown-item" href="Account/Manage">Ir a mi perfil</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/mis-pedidos">Mis Pedidos</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="/mis-cotizaciones">Mis Cotizaciones</a>
                                     </li>
                                     <li>
                                         <form action="Account/Logout" method="post" class="dropdown-item p-0">
@@ -85,8 +91,6 @@
                                 </ul>
                             </div>
 
-
-
                         </Authorized>
                         <NotAuthorized>
                             <a href="/Account/Login" class="btn btn-outline-light">
@@ -95,7 +99,6 @@
                         </NotAuthorized>
                     </AuthorizeView>
 
-
                     <AuthorizeView Roles="Admin">
                         <Authorized>
                             <a href="/admin/home" class="btn btn-outline-warning">
@@ -103,11 +106,8 @@
                             </a>
                         </Authorized>
                         <NotAuthorized>
-                            
                         </NotAuthorized>
                     </AuthorizeView>
-
-
                 </div>
             </div>
         </nav>
@@ -194,7 +194,7 @@
         </div>
     </section>
 
-    
+
     <section class="py-5 bg-white">
         <div class="container">
             <div class="text-center mb-5" data-aos="fade-down">
@@ -228,16 +228,17 @@
                             </div>
                         </div>
                     }
+                    <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="fade-left" data-aos-delay="@(productos?.Count * 100 + 100 ?? 0)">
+                        <a href="/gallery" class="d-flex flex-column justify-content-between p-4 bg-dark text-white h-100 text-decoration-none">
+                            <span class="fs-4 fw-light w-75">Ver Todos Nuestros Proyectos</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right ms-auto d-block">
+                                <path d="M7 7h10v10"></path>
+                                <path d="M7 17 17 7"></path>
+                            </svg>
+                        </a>
+                    </div>
                 }
-                <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="fade-left" data-aos-delay="@(productos?.Count * 100 + 100 ?? 0)">
-                    <a href="/gallery" class="d-flex flex-column justify-content-between p-4 bg-dark text-white h-100 text-decoration-none">
-                        <span class="fs-4 fw-light w-75">Ver Todos Nuestros Proyectos</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right ms-auto d-block">
-                            <path d="M7 7h10v10"></path>
-                            <path d="M7 17 17 7"></path>
-                        </svg>
-                    </a>
-                </div>
+
             </div>
         </div>
     </section>
@@ -294,6 +295,25 @@
     private bool IsScrolled { get; set; } = false;
     private string? currentUrl;
     private DotNetObjectReference<object>? dotNetRef;
+
+    // Se eliminó el registro de OnLocationChanged en OnInitializedAsync y se movió la lógica a OnAfterRenderAsync(firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Solo registrar el LocationChanged en el primer render para evitar múltiples suscripciones
+            NavigationManager.LocationChanged += OnLocationChanged;
+            currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri); // Inicializar currentUrl
+            StateHasChanged(); // Forzar renderizado para mostrar currentUrl si es necesario
+
+            JSModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scrollHandler.js");
+            dotNetRef = DotNetObjectReference.Create<object>(this);
+            await JSModule.InvokeVoidAsync("scrollHandler.initScrollObserver", dotNetRef, 100);
+            await JSRuntime.InvokeVoidAsync("AOS.init");
+        }
+        await JSRuntime.InvokeVoidAsync("AOS.refreshHard");
+    }
+
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
@@ -305,20 +325,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        
         productos = await ProductoService.Listar(p => p.EstadoProductoId == 1);
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            JSModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scrollHandler.js");
-            dotNetRef = DotNetObjectReference.Create<object>(this);
-            await JSModule.InvokeVoidAsync("scrollHandler.initScrollObserver", dotNetRef, 100);
-            await JSRuntime.InvokeVoidAsync("AOS.init"); 
-        }
-        await JSRuntime.InvokeVoidAsync("AOS.refreshHard"); 
     }
 
     [JSInvokable]
@@ -343,6 +350,9 @@
 
     public async ValueTask DisposeAsync()
     {
+        // Asegúrate de desuscribirte cuando el componente se elimine
+        NavigationManager.LocationChanged -= OnLocationChanged;
+
         if (JSModule != null)
         {
             await JSModule.InvokeVoidAsync("scrollHandler.disposeScrollObserver");
@@ -350,6 +360,4 @@
         }
         dotNetRef?.Dispose();
     }
-    
-}
 }

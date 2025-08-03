@@ -143,6 +143,18 @@ public class ProductoService(IDbContextFactory<ApplicationDbContext> DbContext)
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Producto.CountAsync();
     }
+    public async Task<bool> DescontarInventarioAsync(int productoId, int cantidadVendida)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        var producto = await contexto.Producto.FindAsync(productoId);
+
+        if (producto == null || producto.Cantidad < cantidadVendida)
+            return false;
+
+        producto.Cantidad -= cantidadVendida;
+        await contexto.SaveChangesAsync();
+        return true;
+    }
 
 
 }

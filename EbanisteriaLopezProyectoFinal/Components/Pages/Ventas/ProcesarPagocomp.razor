@@ -12,57 +12,74 @@
 @using System.Security.Claims
 @rendermode InteractiveServer
 
-<h3 class="mb-4 text-center">Procesar Pago</h3>
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-md-9">
+            <div class="card shadow-lg border-0 rounded-lg p-lg-5 p-md-4 p-3">
+                <div class="card-body">
+                    <h3 class="mb-4 text-center text-primary fw-bold">Procesar Pago</h3>
 
-<EditForm Model="@ventaModel" OnValidSubmit="ProcesarPago">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+                    <EditForm Model="@ventaModel" OnValidSubmit="ProcesarPago">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="alert alert-danger mb-4" />
 
-    <div class="row mb-3">
-        <div class="col-md-6">
-            <label class="form-label">Nombre Completo</label>
-            <InputText class="form-control" @bind-Value="ventaModel.NombreCliente" />
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="nombreCompleto" class="form-label fw-semibold">Nombre Completo</label>
+                                <InputText id="nombreCompleto" class="form-control form-control-lg" @bind-Value="ventaModel.NombreCliente" placeholder="Ej: Juan Pérez" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="telefono" class="form-label fw-semibold">Teléfono</label>
+                                <InputText id="telefono" class="form-control form-control-lg" @bind-Value="ventaModel.Telefono" placeholder="Ej: 809-123-4567" />
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="direccion" class="form-label fw-semibold">Dirección</label>
+                            <InputText id="direccion" class="form-control form-control-lg" @bind-Value="ventaModel.Direccion" placeholder="Ej: Calle Principal #123, Ciudad" />
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="metodoPago" class="form-label fw-semibold">Método de Pago</label>
+                            <select id="metodoPago" class="form-select form-select-lg" @bind="ventaModel.MetodoPago">
+                                <option disabled value="">-- Selecciona una opción --</option>
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="Transferencia">Transferencia Bancaria</option>
+                            </select>
+                        </div>
+
+                        @if (ventaModel.MetodoPago == "Transferencia")
+                        {
+                            <div class="mb-4 p-3 bg-light rounded border">
+                                <label class="form-label fw-semibold">Subir Comprobante de Transferencia</label>
+                                <InputFile OnChange="SubirComprobante" class="form-control" />
+                                @if (!string.IsNullOrEmpty(voucherName))
+                                {
+                                    <p class="mt-2 text-success"><i class="bi bi-check-circle me-1"></i> Archivo seleccionado: <strong>@voucherName</strong></p>
+                                }
+                                else
+                                {
+                                    <small class="form-text text-muted">Adjunta una imagen de tu comprobante de pago.</small>
+                                }
+                            </div>
+                        }
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="mb-0 text-dark">Total a Pagar:</h5>
+                            <h5 class="mb-0 text-success fw-bold fs-3">@Total.ToString("C", new System.Globalization.CultureInfo("es-DO"))</h5>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 py-3 mt-3">
+                            <i class="bi bi-bag-check-fill me-2"></i> Finalizar Compra
+                        </button>
+                    </EditForm>
+                </div>
+            </div>
         </div>
-        <div class="col-md-6">
-            <label class="form-label">Teléfono</label>
-            <InputText class="form-control" @bind-Value="ventaModel.Telefono" />
-        </div>
     </div>
-
-    <div class="mb-3">
-        <label class="form-label">Dirección</label>
-        <InputText class="form-control" @bind-Value="ventaModel.Direccion" />
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Método de Pago</label>
-        <select class="form-select" @bind="ventaModel.MetodoPago">
-            <option disabled value="">-- Selecciona una opción --</option>
-            <option value="Efectivo">Efectivo</option>
-            <option value="Transferencia">Transferencia</option>
-        </select>
-    </div>
-
-    @if (ventaModel.MetodoPago == "Transferencia")
-    {
-        <div class="mb-3">
-            <label class="form-label">Comprobante de Transferencia</label>
-            <InputFile OnChange="SubirComprobante" />
-            @if (!string.IsNullOrEmpty(voucherName))
-            {
-                <p class="mt-2 text-success"><i class="bi bi-check-circle"></i> @voucherName</p>
-            }
-        </div>
-    }
-
-    <div class="mb-4">
-        <h5>Total a Pagar: <span class="text-success fw-bold">@Total.ToString("C", new System.Globalization.CultureInfo("es-DO"))</span></h5>
-    </div>
-
-    <button type="submit" class="btn btn-success btn-lg">
-        <i class="bi bi-check-circle"></i> Finalizar Compra
-    </button>
-</EditForm>
+</main>
 
 @code {
     private Venta ventaModel = new();
@@ -103,13 +120,13 @@
         bool exito = await VentaService.RegistrarVenta(ventaModel);
         if (exito)
         {
-            Toast.ShowSuccess("Compra realizada con éxito");
+            Toast.ShowSuccess("¡Tu compra se ha realizado con éxito!");
             CarritoService.VaciarCarrito();
-            NavigationManager.NavigateTo("/");
+            NavigationManager.NavigateTo("/mis-pedidos"); // Redirect to mis-pedidos instead of home
         }
         else
         {
-            Toast.ShowError("Error al procesar la compra");
+            Toast.ShowError("Error al procesar la compra. Por favor, inténtalo de nuevo.");
         }
     }
 }

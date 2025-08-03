@@ -2,9 +2,11 @@
 @attribute [Authorize(Roles = "Admin")]
 @inject VentaService VentaService
 @inject NavigationManager NavigationManager
+@inject IToastService Toast
 @using EbanisteriaLopezProyectoFinal.Components.Models
 @using EbanisteriaLopezProyectoFinal.Components.Services
 @using Microsoft.AspNetCore.Authorization
+@rendermode InteractiveServer
 
 <h3 class="mb-4">Historial de Ventas</h3>
 
@@ -19,7 +21,7 @@ else if (!ventas.Any())
 else
 {
     <div class="table-responsive">
-        <table class="table table-bordered table-striped">
+        <table class="table table-bordered table-striped align-middle">
             <thead class="table-success">
                 <tr>
                     <th>Cliente</th>
@@ -31,6 +33,7 @@ else
                     <th>Fecha</th>
                     <th>Total</th>
                     <th>Productos</th>
+                    <th>Estado de Entrega</th>
                 </tr>
             </thead>
             <tbody>
@@ -66,6 +69,24 @@ else
                                 }
                             </ul>
                         </td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <select class="form-select form-select-sm"
+                                        @bind="venta.NuevoEstadoEntrega">
+                                    @foreach (var estado in estadosEntrega)
+                                    {
+                                        <option value="@estado">@estado</option>
+                                    }
+                                </select>
+                                <button class="btn btn-sm btn-success"
+                                        @onclick="() => AplicarCambioEstado(venta)">
+                                    Aplicar
+                                </button>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                Actual: @venta.EstadoEntrega
+                            </div>
+                        </td>
                     </tr>
                 }
             </tbody>
@@ -76,8 +97,33 @@ else
 @code {
     private List<Venta>? ventas;
 
+    private List<string> estadosEntrega = new()
+    {
+        "Pedido recibido",
+        "Enviado",
+        "En camino",
+        "Entregado"
+    };
+
     protected override async Task OnInitializedAsync()
     {
         ventas = await VentaService.Listar();
+
+        // Inicializa el estado editable en cada venta
+        foreach (var venta in ventas)
+        {
+            venta.NuevoEstadoEntrega = venta.EstadoEntrega;
+        }
+    }
+
+    private async Task AplicarCambioEstado(Venta venta)
+    {
+        if (!string.IsNullOrWhiteSpace(venta.NuevoEstadoEntrega) && venta.EstadoEntrega != venta.NuevoEstadoEntrega)
+        {
+            await VentaService.ActualizarEstadoEntregaAsync(venta.VentaId, venta.NuevoEstadoEntrega);
+            venta.EstadoEntrega = venta.NuevoEstadoEntrega;
+
+            Toast.ShowSuccess($"Estado actualizado a '{venta.EstadoEntrega}' para el cliente {venta.NombreCliente}");
+        }
     }
 }
