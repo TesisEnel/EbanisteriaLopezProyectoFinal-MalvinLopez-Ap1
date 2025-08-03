@@ -41,5 +41,14 @@ public class CarritoService
     {
         AgregarProducto(producto, 1);
     }
+    public void CambiarCantidad(int productoId, int nuevaCantidad)
+{
+    var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
+    if (item != null && nuevaCantidad > 0)
+    {
+        item.Cantidad = nuevaCantidad;
+    }
+
+}
 
 }

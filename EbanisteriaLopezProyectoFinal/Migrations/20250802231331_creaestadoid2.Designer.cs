@@ -3,6 +3,7 @@ using System;
 using EbanisteriaLopezProyectoFinal.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace EbanisteriaLopezProyectoFinal.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250802231331_creaestadoid2")]
+    partial class creaestadoid2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,6 +183,9 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
+                    b.Property<int>("EstadoId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("EstadoProductoId")
                         .HasColumnType("integer");
 
@@ -196,6 +202,9 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                     b.Property<decimal>("Precio")
                         .HasColumnType("decimal(18, 2)");
 
+                    b.Property<int?>("VentaId")
+                        .HasColumnType("integer");
+
                     b.HasKey("ProductoId");
 
                     b.HasIndex("CategoriaId");
@@ -204,6 +213,8 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
                     b.HasIndex("Nombre")
                         .IsUnique();
+
+                    b.HasIndex("VentaId");
 
                     b.ToTable("Producto");
                 });
@@ -242,30 +253,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .IsUnique();
 
                     b.ToTable("ProductoDetalle");
-                });
-
-            modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Servicio", b =>
-                {
-                    b.Property<int>("ServicioId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ServicioId"));
-
-                    b.Property<string>("Descripcion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Icono")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Titulo")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ServicioId");
-
-                    b.ToTable("Servicio");
                 });
 
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Data.ApplicationUser", b =>
@@ -472,65 +459,19 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VentaId"));
 
-                    b.Property<string>("CorreoUsuario")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Direccion")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<DateTime>("Fecha")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("MetodoPago")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("NombreCliente")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Telefono")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<decimal>("Total")
                         .HasColumnType("numeric");
 
-                    b.Property<string>("UrlVoucher")
+                    b.Property<string>("UsuarioId")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("VentaId");
 
                     b.ToTable("Ventas");
-                });
-
-            modelBuilder.Entity("VentaItem", b =>
-                {
-                    b.Property<int>("VentaItemId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("VentaItemId"));
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("numeric");
-
-                    b.Property<int>("ProductoId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("VentaId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("VentaItemId");
-
-                    b.HasIndex("VentaId");
-
-                    b.ToTable("VentaItem");
                 });
 
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Cotizacion", b =>
@@ -566,6 +507,10 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .HasForeignKey("EstadoProductoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Venta", null)
+                        .WithMany("Productos")
+                        .HasForeignKey("VentaId");
 
                     b.Navigation("Categoria");
 
@@ -634,15 +579,6 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("VentaItem", b =>
-                {
-                    b.HasOne("Venta", null)
-                        .WithMany("Items")
-                        .HasForeignKey("VentaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("EbanisteriaLopezProyectoFinal.Components.Models.Categoria", b =>
                 {
                     b.Navigation("Productos");
@@ -662,7 +598,7 @@ namespace EbanisteriaLopezProyectoFinal.Migrations
 
             modelBuilder.Entity("Venta", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("Productos");
                 });
 #pragma warning restore 612, 618
         }

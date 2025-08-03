@@ -138,4 +138,11 @@ public class ProductoService(IDbContextFactory<ApplicationDbContext> DbContext)
 
         return await contexto.SaveChangesAsync() > 0;
     }
+    public async Task<int> ContarProductosAsync()
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.Producto.CountAsync();
+    }
+
+
 }

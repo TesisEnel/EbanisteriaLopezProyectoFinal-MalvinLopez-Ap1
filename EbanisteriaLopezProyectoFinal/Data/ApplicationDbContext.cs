@@ -19,6 +19,11 @@ namespace EbanisteriaLopezProyectoFinal.Data
         public DbSet<Cotizacion> Cotizacion { get; set; }
         public DbSet<Contacto> Contactos { get; set; }
         public DbSet<Venta> Ventas { get; set; }
+        public DbSet<Servicio> Servicio { get; set; }
+        
+        
+
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -44,12 +49,7 @@ namespace EbanisteriaLopezProyectoFinal.Data
                 .HasForeignKey(p => p.CategoriaId)
                 .IsRequired(false);
 
-            modelBuilder.Entity<EstadoProducto>()
-                .HasMany(es => es.Productos)
-                .WithOne(p => p.EstadoProducto)
-                .HasForeignKey(p => p.EstadoProductoId)
-                .IsRequired();
-
+           
             modelBuilder.Entity<Producto>()
                 .HasIndex(p => p.Nombre)
                 .IsUnique();
