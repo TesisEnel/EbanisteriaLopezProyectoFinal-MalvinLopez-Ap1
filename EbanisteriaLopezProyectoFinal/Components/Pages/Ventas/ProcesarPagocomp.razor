@@ -1,0 +1,115 @@
+﻿@page "/checkout"
+@inject CarritoService CarritoService
+@inject VentaService VentaService
+@inject IToastService Toast
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JS
+@inject AuthenticationStateProvider AuthStateProvider
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using Microsoft.AspNetCore.Components.Forms
+@using System.Security.Claims
+@rendermode InteractiveServer
+
+<h3 class="mb-4 text-center">Procesar Pago</h3>
+
+<EditForm Model="@ventaModel" OnValidSubmit="ProcesarPago">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Nombre Completo</label>
+            <InputText class="form-control" @bind-Value="ventaModel.NombreCliente" />
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <InputText class="form-control" @bind-Value="ventaModel.Telefono" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Dirección</label>
+        <InputText class="form-control" @bind-Value="ventaModel.Direccion" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Método de Pago</label>
+        <select class="form-select" @bind="ventaModel.MetodoPago">
+            <option disabled value="">-- Selecciona una opción --</option>
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+        </select>
+    </div>
+
+    @if (ventaModel.MetodoPago == "Transferencia")
+    {
+        <div class="mb-3">
+            <label class="form-label">Comprobante de Transferencia</label>
+            <InputFile OnChange="SubirComprobante" />
+            @if (!string.IsNullOrEmpty(voucherName))
+            {
+                <p class="mt-2 text-success"><i class="bi bi-check-circle"></i> @voucherName</p>
+            }
+        </div>
+    }
+
+    <div class="mb-4">
+        <h5>Total a Pagar: <span class="text-success fw-bold">@Total.ToString("C", new System.Globalization.CultureInfo("es-DO"))</span></h5>
+    </div>
+
+    <button type="submit" class="btn btn-success btn-lg">
+        <i class="bi bi-check-circle"></i> Finalizar Compra
+    </button>
+</EditForm>
+
+@code {
+    private Venta ventaModel = new();
+    private IBrowserFile? archivoVoucher;
+    private string? voucherName;
+
+    private decimal Total => CarritoService.ObtenerItems().Sum(p => p.Producto.Precio * p.Cantidad);
+
+    private async Task SubirComprobante(InputFileChangeEventArgs e)
+    {
+        archivoVoucher = e.File;
+        voucherName = archivoVoucher?.Name;
+    }
+
+    private async Task ProcesarPago()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        ventaModel.CorreoUsuario = user.FindFirstValue(ClaimTypes.Email);
+        ventaModel.Fecha = DateTime.UtcNow;
+
+        ventaModel.Total = Total;
+
+        if (ventaModel.MetodoPago == "Transferencia" && archivoVoucher is not null)
+        {
+            var url = await VentaService.SubirVoucher(archivoVoucher);
+            ventaModel.UrlVoucher = url;
+        }
+
+        ventaModel.Items = CarritoService.ObtenerItems().Select(item => new VentaItem
+        {
+            ProductoId = item.Producto.ProductoId,
+            Cantidad = item.Cantidad,
+            PrecioUnitario = item.Producto.Precio
+        }).ToList();
+
+        bool exito = await VentaService.RegistrarVenta(ventaModel);
+        if (exito)
+        {
+            Toast.ShowSuccess("Compra realizada con éxito");
+            CarritoService.VaciarCarrito();
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            Toast.ShowError("Error al procesar la compra");
+        }
+    }
+}
