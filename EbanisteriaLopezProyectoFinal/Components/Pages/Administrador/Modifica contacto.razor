@@ -1,0 +1,71 @@
+﻿@page "/admin/contacto"
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@attribute [Authorize(Roles = "Admin")]
+
+@inject ContactoService ContactoService
+@inject IToastService ToastService
+
+<PageTitle>Contacto</PageTitle>
+
+<h3>Información de Contacto</h3>
+
+@if (contacto is null)
+{
+    <p><em>Cargando...</em></p>
+}
+else
+{
+    <EditForm Model="@contacto" OnValidSubmit="GuardarContacto">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <InputText class="form-control" @bind-Value="contacto.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Teléfono</label>
+            <InputText class="form-control" @bind-Value="contacto.Telefono" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Horario (Semana)</label>
+            <InputText class="form-control" @bind-Value="contacto.HorarioSemana" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Horario (Sábado)</label>
+            <InputText class="form-control" @bind-Value="contacto.HorarioSabado" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Descripción</label>
+            <InputTextArea class="form-control" @bind-Value="contacto.Descripcion" />
+        </div>
+
+        <button class="btn btn-primary" type="submit">Guardar Cambios</button>
+    </EditForm>
+}
+
+@code {
+    private Contacto? contacto;
+
+    protected override async Task OnInitializedAsync()
+    {
+        contacto = await ContactoService.ObtenerAsync();
+    }
+
+    private async Task GuardarContacto()
+    {
+        if (contacto is not null)
+        {
+            var result = await ContactoService.GuardarAsync(contacto);
+            if (result)
+                ToastService.ShowSuccess("Información de contacto actualizada.");
+            else
+                ToastService.ShowError("Error al guardar los datos.");
+        }
+    }
+}

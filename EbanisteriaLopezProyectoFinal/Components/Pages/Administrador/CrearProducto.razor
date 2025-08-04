@@ -4,6 +4,7 @@
 @using EbanisteriaLopezProyectoFinal.Components.Services
 @inject ProductoService ProductoService
 @inject CategoriaServices CategoriaServices
+@inject EstadoProductoService EstadoProductoService
 @inject SupabaseStorageService SupabaseStorage
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
@@ -19,64 +20,72 @@
     <DataAnnotationsValidator />
     <ValidationSummary />
 
-
     <div class="mb-3">
         <label class="form-label">Título</label>
         <InputText class="form-control" @bind-Value="producto.Nombre" />
+        <ValidationMessage For="@(() => producto.Nombre)" />
     </div>
 
- 
     <div class="mb-3">
         <label class="form-label">Precio</label>
         <InputNumber class="form-control" @bind-Value="producto.Precio" />
+        <ValidationMessage For="@(() => producto.Precio)" />
     </div>
 
-    
+    <div class="mb-3">
+        <label class="form-label">Cantidad</label>
+        <InputNumber class="form-control" @bind-Value="producto.Cantidad" />
+        <ValidationMessage For="@(() => producto.Cantidad)" />
+    </div>
+
     <div class="mb-3">
         <label class="form-label">Categoría</label>
         <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
-            <option value="">Seleccione una categoría</option>
+            <option value="0">-- Seleccione una categoría --</option>
             @foreach (var categoria in categorias)
             {
                 <option value="@categoria.CategoriaId">@categoria.Nombre</option>
             }
         </InputSelect>
+        <ValidationMessage For="@(() => producto.CategoriaId)" />
     </div>
 
-  
     <div class="mb-3">
-        <label class="form-label">Estado Producto</label>
+        <label class="form-label">Estado del producto</label>
         <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
-            <option value="">Seleccione un estado</option>
-            <option value="1">Disponible</option>
-            <option value="2">Agotado</option>
-            <option value="3">En espera</option>
+            <option value="0">-- Seleccione un estado --</option>
+            @foreach (var estado in estadosProducto)
+            {
+                <option value="@estado.EstadoProductoId">@estado.Nombre</option>
+            }
         </InputSelect>
+        <ValidationMessage For="@(() => producto.EstadoProductoId)" />
     </div>
-
 
     <div class="mb-3">
         <label class="form-label">Descripción</label>
         <InputTextArea class="form-control" @bind-Value="producto.Detalle.Descripcion" />
+        <ValidationMessage For="@(() => producto.Detalle.Descripcion)" />
     </div>
 
- 
     <div class="row">
         <div class="col-md-4 mb-3">
             <label class="form-label">Material</label>
             <InputText class="form-control" @bind-Value="producto.Detalle.Material" />
+            <ValidationMessage For="@(() => producto.Detalle.Material)" />
         </div>
         <div class="col-md-4 mb-3">
             <label class="form-label">Color</label>
             <InputText class="form-control" @bind-Value="producto.Detalle.Color" />
+            <ValidationMessage For="@(() => producto.Detalle.Color)" />
         </div>
         <div class="col-md-4 mb-3">
             <label class="form-label">Dimensiones</label>
             <InputText class="form-control" @bind-Value="producto.Detalle.Dimensiones" />
+            <ValidationMessage For="@(() => producto.Detalle.Dimensiones)" />
         </div>
     </div>
 
-    
     <div class="mb-3">
         <label class="form-label">Imágenes</label>
         <InputFile OnChange="CargarArchivosSeleccionados" multiple accept="image/*" />
@@ -88,7 +97,6 @@
         }
     </div>
 
-
     <div class="mt-4">
         <button type="submit" class="btn btn-primary">Guardar</button>
         <a href="/admin/productos" class="btn btn-secondary ms-2">Cancelar</a>
@@ -98,25 +106,17 @@
 @code {
     private Producto producto = new()
     {
-        Nombre = "",
-        Precio = 0,
-        CategoriaId = 0,
-        EstadoProductoId = 1, 
         Detalle = new ProductoDetalle()
     };
 
     private List<Categoria> categorias = new();
+    private List<EstadoProducto> estadosProducto = new();
     private List<IBrowserFile> archivosSeleccionados = new();
 
     protected override async Task OnInitializedAsync()
     {
-        // Obtener categorías
-        categorias = await CategoriaServices.Listar(c => true);
-
-        if (categorias.Any())
-        {
-            producto.CategoriaId = categorias.First().CategoriaId;
-        }
+        categorias = await CategoriaServices.Listar();
+        estadosProducto = await EstadoProductoService.Listar();
     }
 
     private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
@@ -126,14 +126,13 @@
         if (archivos.Count > 5)
         {
             ToastService.ShowWarning("Solo puedes seleccionar hasta 5 imágenes.");
-            archivosSeleccionados = archivos.Take(5).ToList(); 
+            archivosSeleccionados = archivos.Take(5).ToList();
         }
         else
         {
             archivosSeleccionados = archivos;
         }
     }
-
 
     private async Task Guardar()
     {
@@ -147,12 +146,10 @@
                 return;
             }
 
-        
             var guardado = await ProductoService.Guardar(producto);
 
             if (guardado && archivosSeleccionados.Any())
             {
-               
                 var urls = await SupabaseStorage.UploadFiles(archivosSeleccionados);
                 foreach (var url in urls)
                 {

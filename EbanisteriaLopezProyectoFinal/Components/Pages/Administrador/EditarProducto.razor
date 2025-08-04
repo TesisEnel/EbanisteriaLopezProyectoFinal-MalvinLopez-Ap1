@@ -4,6 +4,7 @@
 @using EbanisteriaLopezProyectoFinal.Components.Services
 @inject ProductoService ProductoService
 @inject CategoriaServices CategoriaServices
+@inject EstadoProductoService EstadoProductoService
 @inject SupabaseStorageService SupabaseStorage
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
@@ -20,46 +21,52 @@
         <DataAnnotationsValidator />
         <ValidationSummary />
 
-    
         <div class="mb-3">
             <label class="form-label">Título</label>
             <InputText class="form-control" @bind-Value="producto.Nombre" />
+            <ValidationMessage For="@(() => producto.Nombre)" />
         </div>
 
-    
         <div class="mb-3">
             <label class="form-label">Precio</label>
             <InputNumber class="form-control" @bind-Value="producto.Precio" />
+            <ValidationMessage For="@(() => producto.Precio)" />
         </div>
 
-        
+        <div class="mb-3">
+            <label class="form-label">Cantidad disponible</label>
+            <InputNumber class="form-control" @bind-Value="producto.Cantidad" />
+        </div>
+
         <div class="mb-3">
             <label class="form-label">Categoría</label>
             <InputSelect class="form-select" @bind-Value="producto.CategoriaId">
+                <option value="0">-- Selecciona una categoría --</option>
                 @foreach (var categoria in categorias)
                 {
                     <option value="@categoria.CategoriaId">@categoria.Nombre</option>
                 }
             </InputSelect>
+            <ValidationMessage For="@(() => producto.CategoriaId)" />
         </div>
 
-       
         <div class="mb-3">
             <label class="form-label">Estado Producto</label>
             <InputSelect class="form-select" @bind-Value="producto.EstadoProductoId">
-                <option value="1">Disponible</option>
-                <option value="2">Agotado</option>
-                <option value="3">En espera</option>
+                <option value="0">-- Selecciona un estado --</option>
+                @foreach (var estado in estados)
+                {
+                    <option value="@estado.EstadoProductoId">@estado.Nombre</option>
+                }
             </InputSelect>
+            <ValidationMessage For="@(() => producto.EstadoProductoId)" />
         </div>
 
-        
         <div class="mb-3">
             <label class="form-label">Descripción</label>
             <InputTextArea class="form-control" @bind-Value="producto.Detalle.Descripcion" />
         </div>
 
-      
         <div class="row">
             <div class="col-md-4 mb-3">
                 <label class="form-label">Material</label>
@@ -75,7 +82,6 @@
             </div>
         </div>
 
-   
         @if (producto.Imagenes?.Count > 0)
         {
             <div class="mb-3">
@@ -85,14 +91,12 @@
                     {
                         <div class="position-relative">
                             <img src="@img.UrlImagen" alt="imagen" style="width:100px; height:100px; object-fit:cover;" class="rounded shadow-sm" />
-                          
                         </div>
                     }
                 </div>
             </div>
         }
 
-      
         <div class="mb-3">
             <label class="form-label">Agregar nuevas imágenes (máx. 5)</label>
             <InputFile OnChange="CargarArchivosSeleccionados" multiple accept="image/*" />
@@ -107,6 +111,7 @@
         <div class="mt-4">
             <button type="submit" class="btn btn-primary">Actualizar</button>
             <a href="/store" class="btn btn-secondary ms-2">Cancelar</a>
+            <button type="button" class="btn btn-danger ms-2" @onclick="EliminarProducto">Eliminar</button>
         </div>
     </EditForm>
 }
@@ -121,13 +126,14 @@ else
 
     private Producto? producto;
     private List<Categoria> categorias = new();
+    private List<EstadoProducto> estados = new();
     private List<IBrowserFile> archivosSeleccionados = new();
 
     protected override async Task OnInitializedAsync()
     {
-        categorias = await CategoriaServices.Listar(c => true);
-
         producto = await ProductoService.Buscar(ProductoId);
+        categorias = await CategoriaServices.Listar();
+        estados = await EstadoProductoService.Listar();
 
         if (producto == null)
         {
@@ -137,6 +143,17 @@ else
         }
 
         producto.Detalle ??= new ProductoDetalle();
+
+        // Asegura valores válidos para validaciones
+        if (producto.CategoriaId == 0 && categorias.Any())
+        {
+            producto.CategoriaId = categorias.First().CategoriaId;
+        }
+
+        if (producto.EstadoProductoId == 0 && estados.Any())
+        {
+            producto.EstadoProductoId = estados.First().EstadoProductoId;
+        }
     }
 
     private void CargarArchivosSeleccionados(InputFileChangeEventArgs e)
@@ -183,6 +200,28 @@ else
             else
             {
                 ToastService.ShowError("Error al actualizar el producto.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task EliminarProducto()
+    {
+        try
+        {
+            var eliminado = await ProductoService.Eliminar(ProductoId);
+
+            if (eliminado)
+            {
+                ToastService.ShowSuccess("Producto eliminado correctamente.");
+                NavigationManager.NavigateTo("/store");
+            }
+            else
+            {
+                ToastService.ShowError("Error al eliminar el producto.");
             }
         }
         catch (Exception ex)

@@ -2,19 +2,15 @@
 
 namespace EbanisteriaLopezProyectoFinal.Components.Services;
 
-
-
-
 public class CarritoService
 {
-    private List<CarritoItem> items = new();
-    public event Action? OnChange;
+    private readonly List<CarritoItem> _items = [];
 
-    public IEnumerable<CarritoItem> GetItems() => items;
+    public IReadOnlyList<CarritoItem> ObtenerItems() => _items;
 
-    public void AgregarProducto(Producto producto, int cantidad = 1)
+    public void AgregarProducto(Producto producto, int cantidad)
     {
-        var itemExistente = items.FirstOrDefault(i => i.Producto.ProductoId == producto.ProductoId);
+        var itemExistente = _items.FirstOrDefault(p => p.Producto.ProductoId == producto.ProductoId);
 
         if (itemExistente != null)
         {
@@ -22,31 +18,37 @@ public class CarritoService
         }
         else
         {
-            items.Add(new CarritoItem
+            _items.Add(new CarritoItem
             {
                 Producto = producto,
                 Cantidad = cantidad
             });
         }
-
-        NotificarCambio();
     }
 
-    public void QuitarProducto(int productoId)
+    public void EliminarDelCarrito(int productoId)
     {
-        var item = items.FirstOrDefault(i => i.Producto.ProductoId == productoId);
+        var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
         if (item != null)
         {
-            items.Remove(item);
-            NotificarCambio();
+            _items.Remove(item);
         }
     }
 
-    public void LimpiarCarrito()
+    public void VaciarCarrito() => _items.Clear();
+
+    public void AgregarAlCarrito(Producto producto)
     {
-        items.Clear();
-        NotificarCambio();
+        AgregarProducto(producto, 1);
+    }
+    public void CambiarCantidad(int productoId, int nuevaCantidad)
+{
+    var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
+    if (item != null && nuevaCantidad > 0)
+    {
+        item.Cantidad = nuevaCantidad;
     }
 
-    private void NotificarCambio() => OnChange?.Invoke();
+}
+
 }

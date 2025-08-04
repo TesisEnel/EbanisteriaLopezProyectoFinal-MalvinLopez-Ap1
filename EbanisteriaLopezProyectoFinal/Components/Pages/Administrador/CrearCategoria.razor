@@ -1,0 +1,145 @@
+﻿@page "/admin/categorias"
+@attribute [Authorize(Roles = "Admin")]
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@inject CategoriaServices CategoriaService
+@inject NavigationManager NavigationManager
+@inject IToastService ToastService
+
+@rendermode InteractiveServer
+
+<PageTitle>Administrar Categorías</PageTitle>
+
+<h3 class="mb-4">Crear nueva categoría</h3>
+
+<EditForm Model="@categoria" OnValidSubmit="Guardar" FormName="formCrearCategoria">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="nombre" class="form-label">Nombre de la categoría</label>
+        <InputText id="nombre" class="form-control" @bind-Value="categoria.Nombre" />
+    </div>
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="/admin/categorias" class="btn btn-secondary ms-2">Cancelar</a>
+    </div>
+</EditForm>
+
+<hr class="my-5" />
+
+<h3 class="mb-4">Listado de categorías</h3>
+
+@if (categorias is null)
+{
+    <p class="text-danger">Error al cargar las categorías.</p>
+}
+else if (categorias.Count == 0)
+{
+    <p class="text-muted">No hay categorías registradas.</p>
+}
+else
+{
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cat in categorias)
+            {
+                <tr>
+                    <td>@cat.CategoriaId</td>
+                    <td>@cat.Nombre</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning me-2" @onclick="@(() => Editar(cat.CategoriaId))">Editar</button>
+                        <button class="btn btn-sm btn-danger" @onclick="@(() => Eliminar(cat.CategoriaId))">Eliminar</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Categoria categoria = new();
+    private List<Categoria>? categorias;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarCategorias();
+    }
+
+    private async Task Guardar()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(categoria.Nombre))
+            {
+                ToastService.ShowWarning("El nombre de la categoría es requerido.");
+                return;
+            }
+
+            var guardado = await CategoriaService.Insertar(categoria);
+
+            if (guardado)
+            {
+                ToastService.ShowSuccess("Categoría guardada exitosamente.");
+                categoria = new();
+                await CargarCategorias();
+            }
+            else
+            {
+                ToastService.ShowError("Error al guardar la categoría.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error: {ex.Message}");
+        }
+    }
+
+    private async Task CargarCategorias()
+    {
+        try
+        {
+            categorias = await CategoriaService.Listar();
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error cargando categorías: {ex.Message}");
+            categorias = new(); 
+        }
+    }
+
+    private void Editar(int id)
+    {
+        NavigationManager.NavigateTo($"/admin/categorias/editar/{id}");
+    }
+
+    private async Task Eliminar(int id)
+    {
+        try
+        {
+            var confirmado = await CategoriaService.Eliminar(id);
+
+            if (confirmado)
+            {
+                ToastService.ShowSuccess("Categoría eliminada correctamente.");
+                await CargarCategorias();
+            }
+            else
+            {
+                ToastService.ShowWarning("No se pudo eliminar la categoría. Verifica si existe.");
+            }
+        }
+        catch (Exception ex)
+        {
+            ToastService.ShowError($"Error al eliminar: {ex.Message}");
+        }
+    }
+}
