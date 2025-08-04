@@ -18,10 +18,24 @@ builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<AuthenticationStateProvider, IdentityRevalidatingAuthenticationStateProvider>();
 builder.Services.AddBlazoredToast();
 builder.Services.AddScoped<ProductoService>();
+builder.Services.AddScoped<ServicioService>();
+
 builder.Services.AddScoped<CategoriaServices>();
 builder.Services.AddScoped<SupabaseStorageService>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddHttpClient<SupabaseStorageService>();
+builder.Services.AddScoped<CotizacionService>();
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<VentaService>();
+
+
+builder.Services.AddScoped<EstadoProductoService>(sp =>
+
+
+{
+    var dbContextFactory = sp.GetRequiredService<IDbContextFactory<ApplicationDbContext>>();
+    return new EstadoProductoService(dbContextFactory);
+});
 
 builder.Services.AddAuthentication(options =>
 {
@@ -57,6 +71,7 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 
 app.UseHttpsRedirection();
 

@@ -1,0 +1,117 @@
+﻿@page "/admin/servicios"
+@attribute [Authorize(Roles = "Admin")]
+@inject ServicioService ServicioService
+@inject IToastService Toast
+@using EbanisteriaLopezProyectoFinal.Components.Models
+@using EbanisteriaLopezProyectoFinal.Components.Services
+
+<h3 class="mb-4">Administrar Servicios</h3>
+
+<EditForm Model="servicio" OnValidSubmit="Guardar" FormName="FormularioServicios">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Título</label>
+        <InputText class="form-control" @bind-Value="servicio.Titulo" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputTextArea class="form-control" @bind-Value="servicio.Descripcion" rows="4" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Ícono (Bootstrap)</label>
+        <InputText class="form-control" @bind-Value="servicio.Icono" />
+    </div>
+
+    <button type="submit" class="btn btn-success me-2">
+        @((servicio.ServicioId == 0) ? "Agregar Servicio" : "Actualizar Servicio")
+    </button>
+    <button type="button" class="btn btn-secondary" @onclick="Limpiar">Cancelar</button>
+</EditForm>
+
+<hr />
+
+@if (listaServicios?.Any() == true)
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4 mt-3">
+        @foreach (var item in listaServicios)
+        {
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="@item.Icono display-4 text-primary mb-3"></i>
+                        <h5 class="card-title">@item.Titulo</h5>
+                        <p class="card-text">@item.Descripcion</p>
+                        <div class="d-flex justify-content-center gap-2">
+                            <button class="btn btn-sm btn-outline-primary" @onclick="() => Editar(item)">✏️ Editar</button>
+                            <button class="btn btn-sm btn-outline-danger" @onclick="() => Eliminar(item.ServicioId)">🗑️ Eliminar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private Servicio servicio = new();
+    private List<Servicio> listaServicios = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarServicios();
+    }
+
+    private async Task Guardar()
+    {
+        var exito = await ServicioService.Guardar(servicio);
+
+        if (exito)
+        {
+            Toast.ShowSuccess("Servicio guardado");
+            await CargarServicios();
+            servicio = new();
+        }
+        else
+        {
+            Toast.ShowError("Ocurrió un error");
+        }
+    }
+
+    private void Editar(Servicio s)
+    {
+        servicio = new Servicio
+        {
+            ServicioId = s.ServicioId,
+            Titulo = s.Titulo,
+            Descripcion = s.Descripcion,
+            Icono = s.Icono
+        };
+    }
+
+    private async Task Eliminar(int id)
+    {
+        if (await ServicioService.Eliminar(id))
+        {
+            Toast.ShowSuccess("Servicio eliminado");
+            await CargarServicios();
+        }
+        else
+        {
+            Toast.ShowError("Error al eliminar");
+        }
+    }
+
+    private async Task CargarServicios()
+    {
+        listaServicios = await ServicioService.Listar(s => true);
+    }
+
+    private void Limpiar()
+    {
+        servicio = new();
+    }
+}

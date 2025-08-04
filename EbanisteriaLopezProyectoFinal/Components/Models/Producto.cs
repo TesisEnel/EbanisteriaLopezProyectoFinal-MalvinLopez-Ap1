@@ -28,10 +28,12 @@ public class Producto
     [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar una categoría.")]
     public int CategoriaId { get; set; }
 
-    public Categoria? Categoria { get; set; }
-
-    [Required]
+    [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un estado.")]
     public int EstadoProductoId { get; set; }
+
+    public int Cantidad { get; set; }
+
+    public Categoria? Categoria { get; set; }
 
     public EstadoProducto? EstadoProducto { get; set; }
 
