@@ -49,9 +49,5 @@ namespace EbanisteriaLopezProyectoFinal.Components.Services
         }
     }
 
-    public class CarritoItem
-    {
-        public Producto Producto { get; set; } = default!;
-        public int Cantidad { get; set; }
-    }
+
 }

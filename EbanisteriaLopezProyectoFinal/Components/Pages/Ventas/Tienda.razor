@@ -6,10 +6,9 @@
 @inject ProductoService ProductoService
 @inject CarritoService CarritoService
 @inject EstadoProductoService EstadoProductoService
-@inject IJSRuntime JSRuntime
+@inject IToastService Toast
 @inject NavigationManager NavigationManager
 @rendermode InteractiveServer
-
 
 <PageTitle>Tienda - Ebanisteria Lopez</PageTitle>
 
@@ -104,7 +103,6 @@
                             </a>
                         </Authorized>
                         <NotAuthorized>
-
                         </NotAuthorized>
                     </AuthorizeView>
                 </div>
@@ -117,12 +115,7 @@
 
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-50" style="z-index: -1;"></div>
 
-        <a href="/"
-           class="btn btn-light btn-lg rounded-pill shadow-lg position-absolute m-3 d-flex align-items-center gap-2"
-           style="top: 0.5rem; left: 0.5rem; z-index: 10;">
-            <i class="bi bi-house-fill fs-5"></i>
-            <span class="fw-semibold">Inicio</span>
-        </a>
+        <!-- Botón Inicio eliminado -->
 
         <div class="container text-center py-5 position-relative z-1">
             <h1 class="display-4 fw-bold text-white mb-4">Nuestra Tienda</h1>
@@ -289,7 +282,7 @@
         if (producto != null)
         {
             CarritoService.AgregarProducto(producto, 1);
-            JSRuntime.InvokeVoidAsync("alert", $"Producto añadido: {producto.Detalle?.Descripcion}");
+            Toast.ShowSuccess($"Producto añadido: {producto.Detalle?.Descripcion}");
         }
     }
 }

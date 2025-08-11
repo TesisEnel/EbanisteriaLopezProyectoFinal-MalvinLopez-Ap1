@@ -52,7 +52,7 @@
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="/admin/cotizaciones" class="btn btn-secondary ms-2">Cancelar</a>
+                <a href="/store" class="btn btn-secondary ms-2">Cancelar</a>
             </div>
         </div>
 
@@ -100,7 +100,7 @@
             if (guardado)
             {
                 ToastService.ShowSuccess("Cotización guardada correctamente.");
-                NavigationManager.NavigateTo("/admin/cotizaciones");
+                NavigationManager.NavigateTo("/store");
             }
             else
             {
