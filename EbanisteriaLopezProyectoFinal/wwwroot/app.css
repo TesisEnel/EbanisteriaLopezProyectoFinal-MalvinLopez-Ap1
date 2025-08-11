@@ -230,7 +230,7 @@ a, .btn-link {
 /* 🔔 Toasts */
 .blazored-toast {
     position: fixed !important;
-    top: 90px;
+    top: 145px;
     right: 0;
     margin: 1rem;
     z-index: 1100 !important;
