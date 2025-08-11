@@ -1,363 +1,720 @@
 ﻿@page "/"
+
 @using EbanisteriaLopezProyectoFinal.Components.Services
+
 @using Microsoft.AspNetCore.Components.Authorization
+
 @using Microsoft.AspNetCore.Authorization
+
 @inject AuthenticationStateProvider AuthenticationStateProvider
+
 @inject NavigationManager NavigationManager
+
 @inject ProductoService ProductoService
+
 @inject IJSRuntime JSRuntime
-@rendermode InteractiveServer
+
+
+
 
 
 <PageTitle>Inicio - Ebanisteria Lopez</PageTitle>
 
+
+
 <main>
+
     <header class="fixed-top navbar-light bg-secondary @(IsScrolled ? "header-scrolled" : "")">
+
         <nav class="navbar navbar-expand-lg container-fluid px-0">
+
             <a class="navbar-brand me-auto" href="/">
+
                 <img src="/imagenes/logo.png" alt="Ebanisteria Lopez Logo" class="img-fluid" style="height: 75px; object-fit: contain; margin-left: 50px;" />
+
             </a>
 
+
+
             <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+
                 <span class="navbar-toggler-icon"></span>
+
             </button>
 
+
+
             <div class="collapse navbar-collapse" id="navbarNav">
+
                 <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+
                     <li class="nav-item">
+
                         <a class="nav-link text-white hover-primary" aria-current="page" href="/">Inicio</a>
+
                     </li>
+
                     <li class="nav-item">
+
                         <a class="nav-link text-white hover-primary" href="/servicios">Servicios</a>
+
                     </li>
+
                     <li class="nav-item">
+
                         <a class="nav-link text-white hover-primary" href="/store">Tienda</a>
+
                     </li>
+
                     <li class="nav-item">
+
                         <a class="nav-link text-white hover-primary" href="/galeria">Galería</a>
+
                     </li>
+
                     <li class="nav-item">
+
                         <a class="nav-link text-white hover-primary" href="/contact">Contacto</a>
+
                     </li>
+
                 </ul>
 
+
+
                 <div class="d-flex align-items-center">
+
                     <div class="dropdown me-3">
+
                         <button class="btn btn-link text-white dropdown-toggle text-decoration-none" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+
                             <i class="bi bi-globe me-1"></i> ES
+
                         </button>
+
                         <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="languageDropdown">
+
                             <li><a class="dropdown-item" href="#">ES</a></li>
+
                             <li><a class="dropdown-item" href="#">EN</a></li>
+
                         </ul>
+
                     </div>
 
+
+
                     <a href="/cart" class="text-white me-3">
+
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart h-6 w-6">
+
                             <circle cx="8" cy="21" r="1"></circle>
+
                             <circle cx="19" cy="21" r="1"></circle>
+
                             <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+
                         </svg>
+
                     </a>
 
+
+
                     <AuthorizeView>
+
                         <Authorized>
+
                             <div class="dropdown">
+
                                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="miCuentaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+
                                     Mi Cuenta
+
                                 </button>
+
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="miCuentaDropdown">
+
                                     <li>
+
                                         <h6 class="dropdown-header">Hola, @context.User.Identity?.Name</h6>
+
                                     </li>
+
                                     <li>
+
                                         <a class="dropdown-item" href="Account/Manage">Ir a mi perfil</a>
+
                                     </li>
+
                                     <li>
+
                                         <a class="dropdown-item" href="/mis-pedidos">Mis Pedidos</a>
+
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="/mis-cotizaciones">Mis Cotizaciones</a>
+
+                                        <a class="dropdown-item" href="/mis-cotizaciones">Mis Cotizacones</a>
+
                                     </li>
+
                                     <li>
+
                                         <form action="Account/Logout" method="post" class="dropdown-item p-0">
+
                                             <AntiforgeryToken />
+
                                             <input type="hidden" name="ReturnUrl" value="@currentUrl" />
+
                                             <button type="submit" class="btn w-100 text-start">
+
                                                 <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
+
                                             </button>
+
                                         </form>
+
                                     </li>
+
                                 </ul>
+
                             </div>
 
+
+
+
+
+
+
+
+
                         </Authorized>
+
                         <NotAuthorized>
+
                             <a href="/Account/Login" class="btn btn-outline-light">
+
                                 Iniciar Sesión
+
                             </a>
+
                         </NotAuthorized>
+
                     </AuthorizeView>
+
+
+
+
 
                     <AuthorizeView Roles="Admin">
+
                         <Authorized>
+
                             <a href="/admin/home" class="btn btn-outline-warning">
+
                                 Ir al Panel Admin
+
                             </a>
+
                         </Authorized>
+
                         <NotAuthorized>
+
+
+
                         </NotAuthorized>
+
                     </AuthorizeView>
+
+
+
+
+
                 </div>
+
             </div>
+
         </nav>
+
     </header>
 
+
+
     <div class="position-relative d-flex flex-column justify-content-between text-white" style="height: 89vh; max-height: 53rem;">
+
         <video autoplay loop muted playsinline class="position-absolute w-100 h-100 object-fit-cover" style="z-index: -3;" poster="https://placehold.co/1920x1080/000000/FFFFFF?text=Loading+Video">
+
             <source src="/videos/Diseño sin título.mp4" type="video/mp4" />
+
             Your browser does not support the video tag.
+
         </video>
+
+
 
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-black opacity-50" style="z-index: -1;"></div>
 
+
+
         <div class="container mx-auto px-4 py-5 pt-md-5 mt-auto position-relative z-1" data-aos="fade-up" data-aos-duration="1000">
+
             <div class="text-center my-auto">
+
                 <h1 class="display-5 fw-bold text-white mb-4">Puertas<span class="text-primary">|</span>Cocinas<span class="text-primary">|</span>Mobiliario para Grandes Proyectos</h1>
+
             </div>
+
         </div>
+
+
 
         <div class="w-100 text-white py-4 bg-gradient-to-t-black position-relative z-1">
+
             <div class="container mx-auto px-4">
+
                 <div class="row text-center">
+
                     <div class="col-4" data-aos="fade-right" data-aos-delay="200">
+
                         <h4 class="mb-1">39,027 ft2</h4>
+
                         <span class="text-secondary small">Fábrica</span>
+
                     </div>
+
                     <div class="col-4" data-aos="fade-up" data-aos-delay="400">
+
                         <div class="d-inline-block bg-warning rounded-circle" style="width: 32px; height: 32px; vertical-align: middle;"></div>
+
                         <h4 class="mb-1 mt-2">Más de 48 Años</h4>
+
                         <span class="text-secondary small">de experiencia</span>
+
                     </div>
+
                     <div class="col-4" data-aos="fade-left" data-aos-delay="600">
+
                         <h4 class="mb-1">Territorio</h4>
+
                         <span class="text-secondary small">Nacional | Internacional</span>
+
                     </div>
+
                 </div>
+
             </div>
+
         </div>
+
     </div>
 
+
+
     <section class="py-5 bg-white">
+
         <div class="container">
+
             <div class="position-relative" style="height: 340px; overflow: hidden;" data-aos="zoom-in" data-aos-duration="1000">
+
                 <img src="/imagenes/sobre nosotros (2).jpg" alt="Sobre Nosotros Banner" class="img-fluid w-100 h-100 object-fit-cover" />
+
             </div>
+
             <div class="row mt-4">
+
                 <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
+
                     <h2 class="fs-2 fw-bold text-dark mb-3">Sobre Ebanisteria Lopez</h2>
+
                     <div class="bg-dark" style="width: 96px; height: 4px; margin-bottom: 2rem;"></div>
+
                 </div>
+
                 <div class="col-lg-6 text-secondary" data-aos="fade-left">
-                    <p class="mb-3">Con más de 48 años de experiencia, nos enorgullece ser la fábrica de ebanistería y carpintería de aluminio más grande de La Romana.</p>
+
+                    <p class="mb-3">Con más de 48 años de experiencia, nos enorgullece ser la fábrica de ebanistería y carpintería de aluminio más grande de Villa Tapia.</p>
+
                     <p>Colaboramos con desarrolladores inmobiliarios, cadenas hoteleras y proyectos residenciales de alto nivel, brindando soluciones integrales y personalizadas.</p>
+
                 </div>
+
             </div>
+
         </div>
+
     </section>
+
+
 
     <section class="py-5 bg-dark text-white">
+
         <div class="container">
+
             <div class="mb-4" data-aos="fade-up">
+
                 <h2 class="fs-2 fw-bold text-white mb-2">¿Por qué elegir Ebanisteria Lopez?</h2>
+
                 <div class="bg-secondary" style="width: 64px; height: 1px;"></div>
+
             </div>
+
             <div class="row mb-5">
+
                 <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="100">
+
                     <h3 class="fs-4 fw-bold text-light mb-2">Atención Personalizada</h3>
+
                     <p class="text-secondary">Cada proyecto recibe un enfoque único, adaptado al estilo y las necesidades de cada cliente, asegurando resultados a medida.</p>
+
                 </div>
+
                 <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="200">
+
                     <h3 class="fs-4 fw-bold text-light mb-2">Innovación Constante</h3>
+
                     <p class="text-secondary">Utilizamos maquinaria de última generación y materiales modernos (melamina, MDF, aluminio), garantizando calidad y durabilidad.</p>
+
                 </div>
+
                 <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="300">
+
                     <h3 class="fs-4 fw-bold text-light mb-2">Soluciones Integrales</h3>
+
                     <p class="text-secondary">Desde el diseño y la fabricación hasta la instalación y el mantenimiento, cubrimos todo el ciclo del proyecto para brindar una experiencia perfecta.</p>
+
                 </div>
+
                 <div class="col-md-6 mb-4" data-aos="fade-up" data-aos-delay="400">
+
                     <h3 class="fs-4 fw-bold text-light mb-2">Compromiso y Garantía</h3>
+
                     <p class="text-secondary">Cada pieza está respaldada por nuestro riguroso control de calidad y un dedicado servicio postventa, reflejando nuestra seriedad y profesionalismo.</p>
+
                 </div>
+
             </div>
+
             <img src="/imagenes/por que nosotros.jpg" alt="Por qué elegirnos" class="img-fluid w-100" style="height: 400px; object-fit: cover;" data-aos="fade-up" data-aos-duration="1000">
+
         </div>
+
     </section>
+
+
+
 
 
     <section class="py-5 bg-white">
+
         <div class="container">
+
             <div class="text-center mb-5" data-aos="fade-down">
+
                 <h2 class="fs-2 fw-bold text-dark mb-3">Nuestros Proyectos</h2>
-            </div>
-            <div class="row g-3">
-                @if (productos is null)
-                {
-                    <p>Cargando productos...</p>
-                }
-                else if (!productos.Any())
-                {
-                    <p>No hay productos para mostrar.</p>
-                }
-                else
-                {
-                    @for (int i = 0; i < productos.Count; i++)
-                    {
-                        var producto = productos[i];
-                        <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="zoom-in" data-aos-delay="@(i * 100)">
-                            <div class="project-item position-relative ratio ratio-1x1 overflow-hidden" style="cursor:pointer" @onclick="() => NavigateToProductDetails(producto.ProductoId)">
-                                @if (producto.Imagenes != null && producto.Imagenes.Any())
-                                {
-                                    <img src="@producto.Imagenes.OrderBy(img => img.Orden).First().UrlImagen" alt="@producto.Nombre" class="img-fluid project-img" style="object-fit: cover;" />
-                                }
-                                else
-                                {
-                                    <img src="/imagenes/no-image.png" alt="Sin imagen" class="img-fluid project-img" style="object-fit: cover;" />
-                                }
-                                <span class="project-title position-absolute top-50 start-50 translate-middle text-white fw-bold text-truncate px-2">@producto.Nombre</span>
-                            </div>
-                        </div>
-                    }
-                    <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="fade-left" data-aos-delay="@(productos?.Count * 100 + 100 ?? 0)">
-                        <a href="/gallery" class="d-flex flex-column justify-content-between p-4 bg-dark text-white h-100 text-decoration-none">
-                            <span class="fs-4 fw-light w-75">Ver Todos Nuestros Proyectos</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right ms-auto d-block">
-                                <path d="M7 7h10v10"></path>
-                                <path d="M7 17 17 7"></path>
-                            </svg>
-                        </a>
-                    </div>
-                }
 
             </div>
+
+            <div class="row g-3">
+
+                @if (productos is null)
+
+                {
+
+                    <p>Cargando productos...</p>
+
+                }
+
+                else if (!productos.Any())
+
+                {
+
+                    <p>No hay productos para mostrar.</p>
+
+                }
+
+                else
+
+                {
+
+                    @for (int i = 0; i < productos.Count; i++)
+
+                    {
+
+                        var producto = productos[i];
+
+                        <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="zoom-in" data-aos-delay="@(i * 100)">
+
+                            <div class="project-item position-relative ratio ratio-1x1 overflow-hidden" style="cursor:pointer" @onclick="() => NavigateToProductDetails(producto.ProductoId)">
+
+                                @if (producto.Imagenes != null && producto.Imagenes.Any())
+
+                                {
+
+                                    <img src="@producto.Imagenes.OrderBy(img => img.Orden).First().UrlImagen" alt="@producto.Nombre" class="img-fluid project-img" style="object-fit: cover;" />
+
+                                }
+
+                                else
+
+                                {
+
+                                    <img src="/imagenes/no-image.png" alt="Sin imagen" class="img-fluid project-img" style="object-fit: cover;" />
+
+                                }
+
+                                <span class="project-title position-absolute top-50 start-50 translate-middle text-white fw-bold text-truncate px-2">@producto.Nombre</span>
+
+                            </div>
+
+                        </div>
+
+                    }
+
+                }
+
+                <div class="col-12 col-sm-6 col-md-4 col-lg-3" data-aos="fade-left" data-aos-delay="@(productos?.Count * 100 + 100 ?? 0)">
+
+                    <a href="/galeria" class="d-flex flex-column justify-content-between p-4 bg-dark text-white h-100 text-decoration-none">
+
+                        <span class="fs-4 fw-light w-75">Ver Todos Nuestros Proyectos</span>
+
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-arrow-up-right ms-auto d-block">
+
+                            <path d="M7 7h10v10"></path>
+
+                            <path d="M7 17 17 7"></path>
+
+                        </svg>
+
+                    </a>
+
+                </div>
+
+            </div>
+
         </div>
+
     </section>
 
+
+
     <div class="position-relative py-5 text-white bg-cover bg-fixed" style="background-image:url('/imagenes/sobre nosotros (1).jpg'); background-position:center; min-height: 400px;" data-aos="fade-in" data-aos-duration="1000">
+
         <div class="position-absolute top-0 start-0 w-100 h-100 bg-dark opacity-75" style="z-index: 0;"></div>
+
         <div class="position-relative text-center z-1 py-5">
+
             <h2 class="display-6 fw-bold text-white mb-3">Descubre Nuestra Tienda</h2>
+
             <p class="lead mb-4">Encuentra mobiliario, carpintería de aluminio y accesorios de alta calidad en un solo lugar.</p>
+
             <a href="/store" class="btn btn-light btn-lg">
+
                 Ir a la Tienda
+
                 <i class="bi bi-arrow-right ms-2"></i>
+
             </a>
+
         </div>
+
     </div>
 
+
+
     <footer class="bg-white text-secondary border-top py-5">
+
         <div class="container">
+
             <div class="row justify-content-center justify-content-md-between align-items-center mb-4">
+
                 <div class="col-md-auto mb-3 mb-md-0">
+
                     <a href="/">
+
                         <img src="/imagenes/logo.png" alt="Ebanisteria Lopez Logo" class="img-fluid" style="height: 100px; object-fit: contain;" />
+
                     </a>
+
                 </div>
+
                 <div class="col-md-auto text-center">
+
                     <nav class="d-flex flex-wrap justify-content-center gap-3 fs-6 fw-medium">
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/">Inicio</a>
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/services">Servicios</a>
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/store">Tienda</a>
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/gallery">Galería</a>
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/contact">Contacto</a>
+
                     </nav>
+
                     <div class="d-flex justify-content-center gap-3 mt-3 small">
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/terms">Términos y Condiciones</a>
+
                         <a class="text-secondary text-decoration-none hover-dark" href="/privacy">Política de Privacidad</a>
+
                     </div>
+
                 </div>
+
                 <div class="col-md-auto text-center mt-3 mt-md-0">
+
                     <div class="d-flex gap-3 justify-content-center">
+
                         <a target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-dark" href="https://instagram.com/ebanisterialopez">Instagram</a>
+
                         <a target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-dark" href="https://facebook.com/ebanisterialopez">Facebook</a>
+
                     </div>
+
                 </div>
+
             </div>
+
             <div class="text-center small text-muted mt-4">
+
                 © 2025 Ebanisteria Lopez. Todos los derechos reservados.
+
             </div>
+
         </div>
+
     </footer>
+
 </main>
 
+
+
 @code {
+
     private IJSObjectReference? JSModule { get; set; }
+
     private bool IsScrolled { get; set; } = false;
+
     private string? currentUrl;
+
     private DotNetObjectReference<object>? dotNetRef;
 
-    // Se eliminó el registro de OnLocationChanged en OnInitializedAsync y se movió la lógica a OnAfterRenderAsync(firstRender)
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Solo registrar el LocationChanged en el primer render para evitar múltiples suscripciones
-            NavigationManager.LocationChanged += OnLocationChanged;
-            currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri); // Inicializar currentUrl
-            StateHasChanged(); // Forzar renderizado para mostrar currentUrl si es necesario
-
-            JSModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scrollHandler.js");
-            dotNetRef = DotNetObjectReference.Create<object>(this);
-            await JSModule.InvokeVoidAsync("scrollHandler.initScrollObserver", dotNetRef, 100);
-            await JSRuntime.InvokeVoidAsync("AOS.init");
-        }
-        await JSRuntime.InvokeVoidAsync("AOS.refreshHard");
-    }
-
     private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+
     {
+
         currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+
         StateHasChanged();
+
     }
+
+
+
 
 
     private List<Producto>? productos;
 
+
+
     protected override async Task OnInitializedAsync()
+
     {
+
+
+
         productos = await ProductoService.Listar(p => p.EstadoProductoId == 1);
+
     }
+
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+
+    {
+
+        if (firstRender)
+
+        {
+
+            JSModule = await JSRuntime.InvokeAsync<IJSObjectReference>("import", "./js/scrollHandler.js");
+
+            dotNetRef = DotNetObjectReference.Create<object>(this);
+
+            await JSModule.InvokeVoidAsync("scrollHandler.initScrollObserver", dotNetRef, 100);
+
+            await JSRuntime.InvokeVoidAsync("AOS.init");
+
+        }
+
+        await JSRuntime.InvokeVoidAsync("AOS.refreshHard");
+
+    }
+
+
 
     [JSInvokable]
+
     public void OnScrollChanged(bool scrolled)
+
     {
+
         if (IsScrolled != scrolled)
+
         {
+
             IsScrolled = scrolled;
+
             StateHasChanged();
+
         }
+
     }
+
+
 
     private void NavigateToProductDetails(int productoId)
+
     {
+
         NavigationManager.NavigateTo($"/store/details/{productoId}");
+
     }
+
+
 
     private void NavigateToAdminPage()
+
     {
+
         NavigationManager.NavigateTo("/admin/home");
+
     }
+
+
 
     public async ValueTask DisposeAsync()
+
     {
-        // Asegúrate de desuscribirte cuando el componente se elimine
-        NavigationManager.LocationChanged -= OnLocationChanged;
 
         if (JSModule != null)
+
         {
+
             await JSModule.InvokeVoidAsync("scrollHandler.disposeScrollObserver");
+
             await JSModule.DisposeAsync();
+
         }
+
         dotNetRef?.Dispose();
+
     }
+
+
+
+}
+
 }
