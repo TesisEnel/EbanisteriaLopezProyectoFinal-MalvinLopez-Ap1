@@ -1,54 +1,57 @@
 ﻿using EbanisteriaLopezProyectoFinal.Components.Models;
 
-namespace EbanisteriaLopezProyectoFinal.Components.Services;
-
-public class CarritoService
+namespace EbanisteriaLopezProyectoFinal.Components.Services
 {
-    private readonly List<CarritoItem> _items = [];
-
-    public IReadOnlyList<CarritoItem> ObtenerItems() => _items;
-
-    public void AgregarProducto(Producto producto, int cantidad)
+    public class CarritoService
     {
-        var itemExistente = _items.FirstOrDefault(p => p.Producto.ProductoId == producto.ProductoId);
+        private readonly List<CarritoItem> _items = new();
 
-        if (itemExistente != null)
+        public IReadOnlyList<CarritoItem> ObtenerItems() => _items;
+
+        public void AgregarProducto(Producto producto, int cantidad)
         {
-            itemExistente.Cantidad += cantidad;
-        }
-        else
-        {
-            _items.Add(new CarritoItem
+            var itemExistente = _items.FirstOrDefault(p => p.Producto.ProductoId == producto.ProductoId);
+            if (itemExistente != null)
             {
-                Producto = producto,
-                Cantidad = cantidad
-            });
+                itemExistente.Cantidad += cantidad;
+            }
+            else
+            {
+                _items.Add(new CarritoItem
+                {
+                    Producto = producto,
+                    Cantidad = cantidad
+                });
+            }
         }
-    }
 
-    public void EliminarDelCarrito(int productoId)
-    {
-        var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
-        if (item != null)
+        public void EliminarDelCarrito(int productoId)
         {
-            _items.Remove(item);
+            var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
+            if (item != null)
+            {
+                _items.Remove(item);
+            }
+        }
+
+        public void CambiarCantidad(int productoId, int nuevaCantidad)
+        {
+            var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
+            if (item != null && nuevaCantidad > 0)
+            {
+                item.Cantidad = nuevaCantidad;
+            }
+        }
+
+        public void VaciarCarrito()
+        {
+            _items.Clear();
         }
     }
 
-    public void VaciarCarrito() => _items.Clear();
-
-    public void AgregarAlCarrito(Producto producto)
+    public class CarritoItem
     {
-        AgregarProducto(producto, 1);
+        public Producto Producto { get; set; } = default!;
+        public int Cantidad { get; set; }
     }
-    public void CambiarCantidad(int productoId, int nuevaCantidad)
-{
-    var item = _items.FirstOrDefault(p => p.Producto.ProductoId == productoId);
-    if (item != null && nuevaCantidad > 0)
-    {
-        item.Cantidad = nuevaCantidad;
-    }
-
-}
-
 }
