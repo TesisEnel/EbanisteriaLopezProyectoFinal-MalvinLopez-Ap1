@@ -1,24 +1,27 @@
-/* Variables principales */
+﻿/* 🎨 Variables principales: Cambia aquí los colores globales */
 :root {
-    --bs-primary: #FFD700;
-    --bs-secondary: #343a40;
-    --bs-dark: #212529;
-    --bs-light: #f8f9fa;
-    --bs-gray-600: #6c757d;
+    --bs-primary: #FFD700; /* Color principal (botones, acentos) */
+    --bs-secondary: #343a40; /* Color secundario (textos oscuros, header/footer) */
+    --bs-dark: #212529; /* Color oscuro general */
+    --bs-light: #f8f9fa; /* Color claro general (fondos) */
+    --bs-gray-600: #6c757d; /* Gris para textos secundarios */
     --bs-primary-rgb: 255, 215, 0;
-    --bs-success-rgb: 25, 135, 84;
-    --bs-warning-rgb: 255, 193, 7;
-    --bs-info-rgb: 13, 202, 240;
+    --bs-success-rgb: 25, 135, 84; /* Verde de éxito */
+    --bs-warning-rgb: 255, 193, 7; /* Amarillo de advertencia */
+    --bs-info-rgb: 13, 202, 240; /* Azul de información */
     --light-primary: rgba(var(--bs-primary-rgb), 0.1);
     --light-success: rgba(var(--bs-success-rgb), 0.1);
     --light-warning: rgba(var(--bs-warning-rgb), 0.1);
     --light-info: rgba(var(--bs-info-rgb), 0.1);
 }
 
+/* 📝 Tipografía general */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 100%;
 }
 
+/* 🔍 Textos con recorte y sin bordes al enfocar */
 h1:focus, .project-title, .overlay-text {
     outline: none;
     white-space: nowrap;
@@ -26,16 +29,18 @@ h1:focus, .project-title, .overlay-text {
     text-overflow: ellipsis;
 }
 
+/* 🔗 Links */
 a, .btn-link {
-    color: #006bb7;
+    color: #006bb7; /* Color de los enlaces */
     transition: color 0.2s ease;
 }
 
     .btn-link:hover, .hover-dark:hover {
-        color: var(--bs-dark) !important;
+        color: var(--bs-dark) !important; /* Color al pasar el mouse */
     }
 
-.btn-primary, .btn-outline-primary {
+/* 🔘 Botones */
+.btn-primary {
     color: #fff;
     background-color: var(--bs-primary);
     border-color: var(--bs-primary);
@@ -46,6 +51,7 @@ a, .btn-link {
 .btn-outline-primary {
     background-color: transparent;
     color: var(--bs-primary);
+    border-color: var(--bs-primary);
 }
 
     .btn-outline-primary:hover {
@@ -53,18 +59,19 @@ a, .btn-link {
         color: #fff;
     }
 
+/* ✏️ Formulario */
 .btn:focus, .form-control:focus, .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb; /* Borde al enfocar */
 }
 
 .form-control, .form-select {
     border-radius: 8px;
     padding: 0.75rem 1rem;
-    border-color: #dee2e6;
+    border-color: #dee2e6; /* Color del borde */
 }
 
     .form-control::placeholder {
-        color: #6c757d;
+        color: #6c757d; /* Color del placeholder */
         opacity: 0.7;
     }
 
@@ -78,16 +85,17 @@ a, .btn-link {
     border-color: var(--bs-primary);
 }
 
+/* ✅ Validación */
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid #26b050; /* Verde de éxito */
 }
 
 .invalid, .validation-message {
-    color: #e50000;
+    color: #e50000; /* Rojo de error */
     outline: 1px solid #e50000;
 }
 
-/* Navegaci�n y t�tulos */
+/* 📌 Navegación */
 .nav-link {
     transition: color 0.3s ease-in-out;
 }
@@ -97,11 +105,11 @@ a, .btn-link {
     }
 
 .header-scrolled {
-    background-color: #343a40 !important;
+    background-color: #343a40 !important; /* Fondo del header al hacer scroll */
     transition: background-color 0.3s ease-in-out;
 }
 
-/* Proyectos e im�genes */
+/* 🖼️ Proyectos y Tienda */
 .project-item, .store-card {
     border-radius: 8px;
     overflow: hidden;
@@ -125,7 +133,7 @@ a, .btn-link {
         transform: scale(1.05);
     }
 
-/* Paneles y tarjetas admin */
+/* 📊 Paneles */
 .admin-container, .login-container, .content-panel, .account-management-container {
     border-radius: 0.75rem;
     background-color: #fff;
@@ -141,9 +149,9 @@ a, .btn-link {
         box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
     }
 
-/* Errores Blazor */
+/* ⚠️ Errores Blazor */
 .blazor-error-boundary {
-    background: #b32121 url(data:image/svg+xml;base64,...) no-repeat 1rem/1.8rem;
+    background: #b32121; /* Fondo del error */
     padding: 1rem 1rem 1rem 3.7rem;
     color: white;
 }
@@ -152,17 +160,14 @@ a, .btn-link {
         content: "An error has occurred.";
     }
 
-/* Otros */
-.login-wrapper, .admin-wrapper {
-    background-color: var(--e-bg-light);
-}
-
+/* 🗺️ Mapas */
 .map-container {
     border-radius: 8px;
     overflow: hidden;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+/* 📦 Tarjetas */
 .card-title {
     font-size: 1.3rem;
 }
@@ -181,6 +186,7 @@ a, .btn-link {
     overflow: hidden;
 }
 
+/* ✂️ Texto truncado */
 .text-truncate-line-1 {
     overflow: hidden;
     white-space: nowrap;
@@ -199,6 +205,8 @@ a, .btn-link {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+/* 🖼️ Galería */
 .gallery-img-wrapper {
     overflow: hidden;
     border-radius: 0.5rem;
@@ -212,19 +220,24 @@ a, .btn-link {
         transform: scale(1.05);
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     }
+
 .img-fluid:hover {
     filter: brightness(1.1);
     transform: scale(1.02);
     transition: 0.3s ease;
 }
+
+/* 🔔 Toasts */
 .blazored-toast {
     position: fixed !important;
-    top: 90px; /* Ajusta esto a la altura exacta de tu header */
+    top: 90px;
     right: 0;
     margin: 1rem;
     z-index: 1100 !important;
     max-width: 320px;
-    width: auto;
 }
 
-
+/* 📄 Estructura página */
+.page {
+    min-height: calc(100vh - 95px - 200px); /* Alto total - header - footer */
+}
