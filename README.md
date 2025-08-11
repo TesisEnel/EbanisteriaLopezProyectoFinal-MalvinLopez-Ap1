@@ -67,7 +67,6 @@ La plataforma está optimizada para dispositivos móviles y de escritorio, con m
 
 * Visualización de todos los productos con precio, imágenes y descripción.
 * Botones dinámicos: *Añadir al carrito* o *Solicitar cotización*.
-* Sección de **ofertas o destacados**.
 * Adaptación automática para móvil y escritorio.
 
 ---
@@ -85,8 +84,7 @@ La plataforma está optimizada para dispositivos móviles y de escritorio, con m
 ### **5. Cotizaciones**
 
 * Solicitud de cotización para productos no disponibles o personalizados.
-* El cliente puede escribir observaciones.
-* El administrador recibe la solicitud y responde con precio y detalles.
+* El administrador recibe la solicitud y responde con precio y detalles por WhatsApp.
 * Seguimiento de estado: **Pendiente**, **Respondida**, **Rechazada**.
 
 ---
@@ -131,13 +129,7 @@ La plataforma está optimizada para dispositivos móviles y de escritorio, con m
 
 ---
 
-### **10. Chat en tiempo real (Administrador ↔ Cliente)**
 
-* Comunicación directa entre cliente y administrador.
-* Posibilidad de enviar mensajes relacionados con pedidos o cotizaciones.
-* Vista separada para cada usuario con historial de mensajes.
-
----
 
 ## **Tecnologías utilizadas**
 
@@ -165,9 +157,6 @@ La plataforma está optimizada para dispositivos móviles y de escritorio, con m
 * Comercios que combinen venta directa y servicios adicionales.
 * Empresas que requieran un sistema de ventas + chat con clientes.
 
----
-Perfecto, podemos organizar tus imágenes como un **catálogo visual**, con un diseño de dos columnas para que en la documentación se vea ordenado y profesional.
-Te lo dejo en formato **Markdown** listo para que lo pegues en tu documento o README:
 
 ---
 
