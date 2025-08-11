@@ -10,23 +10,38 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Register confirmation</PageTitle>
+<PageTitle>Confirmación de registro</PageTitle>
 
-<h1>Register confirmation</h1>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-sm p-4 text-center">
+                <h2 class="mb-4 text-primary fw-bold">Confirmación de Registro</h2>
 
-<StatusMessage Message="@statusMessage" />
+                @if (!string.IsNullOrEmpty(statusMessage))
+                {
+                    <div class="alert alert-info" role="alert">@statusMessage</div>
+                }
 
-@if (emailConfirmationLink is not null)
-{
-    <p>
-        This app does not currently have a real email sender registered, see <a href="https://aka.ms/aspaccountconf">these docs</a> for how to configure a real email sender.
-        Normally this would be emailed: <a href="@emailConfirmationLink">Click here to confirm your account</a>
-    </p>
-}
-else
-{
-    <p role="alert">Please check your email to confirm your account.</p>
-}
+                @if (emailConfirmationLink is not null)
+                {
+                    <p>
+                        Esta aplicación actualmente no tiene un servicio real de envío de correos configurado.<br />
+                        Consulta <a href="https://aka.ms/aspaccountconf" target="_blank" rel="noopener noreferrer">estos documentos</a> para saber cómo configurarlo.<br />
+                        Mientras tanto, puedes confirmar tu cuenta haciendo clic aquí: <br />
+                        <a href="@emailConfirmationLink" class="btn btn-success mt-2">Confirmar mi cuenta</a>
+                    </p>
+                }
+                else
+                {
+                    <p class="fs-5" role="alert">Por favor, revisa tu correo electrónico para confirmar tu cuenta.</p>
+                }
+
+            
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private string? emailConfirmationLink;
@@ -46,23 +61,33 @@ else
         if (Email is null)
         {
             RedirectManager.RedirectTo("");
+            return;
         }
 
         var user = await UserManager.FindByEmailAsync(Email);
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = "Error finding user for unspecified email";
+            statusMessage = "Error: no se encontró un usuario con ese correo electrónico.";
+            return;
         }
-        else if (EmailSender is IdentityNoOpEmailSender)
+
+        if (EmailSender is IdentityNoOpEmailSender)
         {
-            // Once you add a real email sender, you should remove this code that lets you confirm the account
+            // Código para mostrar enlace directo cuando no hay un servicio real de email configurado
             var userId = await UserManager.GetUserIdAsync(user);
             var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
             code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
             emailConfirmationLink = NavigationManager.GetUriWithQueryParameters(
                 NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
-                new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+                new Dictionary<string, object?>
+                {
+                    ["userId"] = userId,
+                    ["code"] = code,
+                    ["returnUrl"] = ReturnUrl
+                });
         }
     }
+
+   
 }
