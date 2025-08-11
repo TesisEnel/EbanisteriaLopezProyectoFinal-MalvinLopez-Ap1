@@ -241,3 +241,16 @@ a, .btn-link {
 .page {
     min-height: calc(100vh - 95px - 200px); /* Alto total - header - footer */
 }
+.logo-responsive {
+    height: 120px; /* tamaño grande para escritorio */
+    object-fit: contain;
+    margin-left: 50px;
+    transition: height 0.3s ease, margin-left 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .logo-responsive {
+        height: 60px; /* más pequeño en tablet y móvil */
+        margin-left: 15px; /* menos margen a la izquierda */
+    }
+}
