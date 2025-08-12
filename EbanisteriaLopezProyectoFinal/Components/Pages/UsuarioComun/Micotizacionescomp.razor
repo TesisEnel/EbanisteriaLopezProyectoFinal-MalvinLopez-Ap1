@@ -1,1 +1,95 @@
-﻿
+﻿@page "/mis-cotizaciones"
+@inject CotizacionService CotizacionService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager NavigationManager
+@using EbanisteriaLopezProyectoFinal.Components.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@using EbanisteriaLopezProyectoFinal.Components.Models
+
+<div class="container py-5">
+    <h3 class="mb-5 text-center text-primary fw-bold display-6">Mis Cotizaciones</h3>
+
+    @if (cotizaciones == null)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando...</span>
+            </div>
+            <p class="ms-3 text-muted">Cargando cotizaciones...</p>
+        </div>
+    }
+    else if (!cotizaciones.Any())
+    {
+        <div class="alert alert-info text-center shadow-sm p-4">
+            <h4 class="alert-heading">¡Nada por aquí!</h4>
+            <p>No tienes cotizaciones registradas en este momento.</p>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-lg border-0 rounded-3">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle text-center mb-0">
+                        <thead class="bg-primary text-white">
+                            <tr>
+                                <th scope="col">Producto</th>
+                                <th scope="col">Fecha</th>
+                                <th scope="col">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var cot in cotizaciones)
+                            {
+                                <tr class="bg-white">
+                                    <td>
+                                        @if (cot.Producto != null)
+                                        {
+                                            <span class="fw-bold text-dark">@cot.Producto.Nombre</span>
+                                        }
+                                        else
+                                        {
+                                            <em class="text-muted">Producto no disponible</em>
+                                        }
+                                    </td>
+                                    <td>
+                                        <small class="text-muted">@cot.FechaSolicitud.ToString("dd/MM/yyyy")</small>
+                                    </td>
+                                    <td>
+                                        @if (cot.EstaResuelto)
+                                        {
+                                            <span class="badge bg-success py-2 px-3">Respondida </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning text-dark py-2 px-3">Pendiente</span>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private List<Cotizacion>? cotizaciones;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var usuario = authState.User;
+
+        if (usuario.Identity is not null && usuario.Identity.IsAuthenticated)
+        {
+            var email = usuario.Identity.Name;
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                cotizaciones = await CotizacionService.ListarPorUsuario(email);
+            }
+        }
+    }
+}

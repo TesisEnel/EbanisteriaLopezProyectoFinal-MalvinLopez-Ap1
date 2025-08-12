@@ -1,9 +1,11 @@
 ﻿@page "/admin/servicios"
 @attribute [Authorize(Roles = "Admin")]
 @inject ServicioService ServicioService
+@inject SupabaseStorageService SupabaseStorageService
 @inject IToastService Toast
 @using EbanisteriaLopezProyectoFinal.Components.Models
 @using EbanisteriaLopezProyectoFinal.Components.Services
+@using Microsoft.AspNetCore.Components.Forms
 
 <h3 class="mb-4">Administrar Servicios</h3>
 
@@ -22,9 +24,16 @@
     </div>
 
     <div class="mb-3">
-        <label class="form-label">Ícono (Bootstrap)</label>
-        <InputText class="form-control" @bind-Value="servicio.Icono" />
+        <label class="form-label">Imagen del Servicio</label>
+        <InputFile OnChange="OnInputFileChange" accept="image/*" />
     </div>
+
+    @if (!string.IsNullOrEmpty(servicio.Icono))
+    {
+        <div class="mb-3">
+            <img src="@servicio.Icono" alt="Imagen Servicio" style="max-height: 150px; max-width: 150px;" />
+        </div>
+    }
 
     <button type="submit" class="btn btn-success me-2">
         @((servicio.ServicioId == 0) ? "Agregar Servicio" : "Actualizar Servicio")
@@ -42,7 +51,10 @@
             <div class="col">
                 <div class="card h-100 shadow-sm">
                     <div class="card-body text-center">
-                        <i class="@item.Icono display-4 text-primary mb-3"></i>
+                        @if (!string.IsNullOrEmpty(item.Icono))
+                        {
+                            <img src="@item.Icono" alt="@item.Titulo" style="max-height: 100px; margin-bottom: 15px;" />
+                        }
                         <h5 class="card-title">@item.Titulo</h5>
                         <p class="card-text">@item.Descripcion</p>
                         <div class="d-flex justify-content-center gap-2">
@@ -59,6 +71,8 @@
 @code {
     private Servicio servicio = new();
     private List<Servicio> listaServicios = new();
+
+    private bool isUploading = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -113,5 +127,34 @@
     private void Limpiar()
     {
         servicio = new();
+    }
+
+    private async Task OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            isUploading = true;
+            StateHasChanged();
+
+            try
+            {
+                var urls = await SupabaseStorageService.UploadFiles(new[] { file });
+                if (urls.Any())
+                {
+                    servicio.Icono = urls[0];
+                    Toast.ShowSuccess("Imagen subida correctamente");
+                }
+            }
+            catch (Exception ex)
+            {
+                Toast.ShowError($"Error al subir imagen: {ex.Message}");
+            }
+            finally
+            {
+                isUploading = false;
+                StateHasChanged();
+            }
+        }
     }
 }

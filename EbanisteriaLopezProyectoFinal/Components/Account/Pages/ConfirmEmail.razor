@@ -7,14 +7,38 @@
 
 @inject UserManager<ApplicationUser> UserManager
 @inject IdentityRedirectManager RedirectManager
+@inject NavigationManager NavigationManager
 
-<PageTitle>Confirm email</PageTitle>
+<PageTitle>Confirmar correo electrónico</PageTitle>
 
-<h1>Confirm email</h1>
-<StatusMessage Message="@statusMessage" />
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm p-4 text-center">
+                <h2 class="mb-4 text-primary fw-bold">Confirmación de correo electrónico</h2>
+
+                @if (!string.IsNullOrEmpty(statusMessage))
+                {
+                    <div class="alert @(isSuccess ? "alert-success" : "alert-danger")" role="alert">
+                        @statusMessage
+                    </div>
+                }
+                else
+                {
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                }
+
+                
+            </div>
+        </div>
+    </div>
+</div>
 
 @code {
     private string? statusMessage;
+    private bool isSuccess = false;
 
     [CascadingParameter]
     private HttpContext HttpContext { get; set; } = default!;
@@ -29,20 +53,33 @@
     {
         if (UserId is null || Code is null)
         {
-            RedirectManager.RedirectTo("");
+            RedirectManager.RedirectTo("/");
+            return;
         }
 
         var user = await UserManager.FindByIdAsync(UserId);
         if (user is null)
         {
             HttpContext.Response.StatusCode = StatusCodes.Status404NotFound;
-            statusMessage = $"Error loading user with ID {UserId}";
+            statusMessage = $"Error: no se encontró el usuario con ID {UserId}.";
+            isSuccess = false;
         }
         else
         {
-            var code = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
-            var result = await UserManager.ConfirmEmailAsync(user, code);
-            statusMessage = result.Succeeded ? "Thank you for confirming your email." : "Error confirming your email.";
+            var codeDecoded = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(Code));
+            var result = await UserManager.ConfirmEmailAsync(user, codeDecoded);
+            if (result.Succeeded)
+            {
+                statusMessage = "Gracias por confirmar tu correo electrónico.";
+                isSuccess = true;
+            }
+            else
+            {
+                statusMessage = "Error al confirmar el correo electrónico.";
+                isSuccess = false;
+            }
         }
     }
+
+
 }

@@ -1,23 +1,164 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-   
+<header class="fixed-top navbar-light bg-secondary @(IsScrolled ? "header-scrolled" : "")">
+    <nav class="navbar navbar-expand-lg container-fluid px-0">
+        <a class="navbar-brand me-auto" href="/">
+            <img src="/imagenes/unnamed-removebg-preview.png" alt="Ebanisteria Lopez Logo" class="img-fluid logo-responsive" />
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+
+        </a>
+
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link text-white hover-primary" aria-current="page" href="/">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white hover-primary" href="/servicios">Servicios</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white hover-primary" href="/store">Tienda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white hover-primary" href="/galeria">Galería</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center">
+                <div class="dropdown me-3">
+                    <button class="btn btn-link text-white dropdown-toggle text-decoration-none" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-globe me-1"></i> ES
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="languageDropdown">
+                        <li><a class="dropdown-item" href="#">ES</a></li>
+                        <li><a class="dropdown-item" href="#">EN</a></li>
+                    </ul>
+                </div>
+
+                <a href="/cart" class="text-white me-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart h-6 w-6">
+                        <circle cx="8" cy="21" r="1"></circle>
+                        <circle cx="19" cy="21" r="1"></circle>
+                        <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+                    </svg>
+                </a>
+
+                <AuthorizeView>
+                    <Authorized>
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" id="miCuentaDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                Mi Cuenta
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="miCuentaDropdown">
+                                <li>
+                                    <h6 class="dropdown-header">Hola, @context.User.Identity?.Name</h6>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="Account/Manage">Ir a mi perfil</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/mis-pedidos">Mis Pedidos</a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="/mis-cotizaciones">Mis Cotizaciones</a>
+                                </li>
+                                <li>
+                                    <form action="Account/Logout" method="post" class="dropdown-item p-0">
+                                        <AntiforgeryToken />
+                                        <input type="hidden" name="ReturnUrl" value="@currentUrl"/>
+                                        <button type="submit" class="btn w-100 text-start">
+                                            <span class="bi bi-arrow-bar-left" aria-hidden="true"></span> Cerrar Sesión
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    </Authorized>
+                    <NotAuthorized>
+                        <a href="/Account/Login" class="btn btn-outline-light">
+                            Iniciar Sesión
+                        </a>
+                    </NotAuthorized>
+                </AuthorizeView>
+
+                <AuthorizeView Roles="Admin">
+                    <Authorized>
+                        <a href="/admin/home" class="btn btn-outline-warning">
+                            Ir al Panel Admin
+                        </a>
+                    </Authorized>
+                </AuthorizeView>
+            </div>
         </div>
+    </nav>
+</header>
 
-       
-            @Body
-        
+<div class="page d-flex flex-column min-vh-100">
+    <main class="flex-grow-1" style="padding-top: 95px;">
+        @Body
     </main>
+
+    <footer class="bg-white text-secondary border-top py-5">
+        <div class="container">
+            <div class="row justify-content-center justify-content-md-between align-items-center mb-4">
+                <div class="col-md-auto mb-3 mb-md-0">
+                    <a href="/">
+                        <img src="/imagenes/unnamed-removebg-preview.png" alt="Ebanisteria Lopez Logo" class="img-fluid" style="height: 100px; object-fit: contain;" />
+                    </a>
+                </div>
+
+                <div class="col-md-auto text-center">
+                    <nav class="d-flex flex-wrap justify-content-center gap-3 fs-6 fw-medium">
+                        <a class="text-secondary text-decoration-none hover-dark" href="/">Inicio</a>
+                        <a class="text-secondary text-decoration-none hover-dark" href="/servicios">Servicios</a>
+                        <a class="text-secondary text-decoration-none hover-dark" href="/store">Tienda</a>
+                        <a class="text-secondary text-decoration-none hover-dark" href="/galeria">Galería</a>
+                    </nav>
+
+                    <div class="d-flex justify-content-center gap-3 mt-3 small">
+                        <a class="text-secondary text-decoration-none hover-dark" href="/terms">Términos y Condiciones</a>
+                        <a class="text-secondary text-decoration-none hover-dark" href="/privacy">Política de Privacidad</a>
+                    </div>
+                </div>
+
+                <div class="col-md-auto text-center mt-3 mt-md-0">
+                    <div class="d-flex gap-3 justify-content-center">
+                        <a target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-dark" href="https://www.instagram.com/ebanisteria_lopez1?igsh=b2xlejc1dXkzNXNn">Instagram</a>
+                        <a target="_blank" rel="noopener noreferrer" class="text-secondary text-decoration-none hover-dark" href="https://facebook.com/ebanisterialopez">Facebook</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center small text-muted mt-4">
+                © 2025 Ebanisteria Lopez. Todos los derechos reservados.
+            </div>
+        </div>
+    </footer>
 </div>
+
 <LoginDisplay />
 
-<BlazoredToasts @rendermode="RenderMode.InteractiveServer"> </BlazoredToasts> />
+<BlazoredToasts @rendermode="RenderMode.InteractiveServer" />
+
 <div id="blazor-error-ui" data-nosnippet>
     An unhandled error has occurred.
     <a href="." class="reload">Reload</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    private bool IsScrolled = false;
+    private string currentUrl = "";
+
+    protected override void OnInitialized()
+    {
+        currentUrl = Navigation.Uri;
+    }
+
+    [Inject]
+    private NavigationManager Navigation { get; set; } = default!;
+}
