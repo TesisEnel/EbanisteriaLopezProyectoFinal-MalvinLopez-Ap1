@@ -22,13 +22,22 @@ public class CotizacionService(IDbContextFactory<ApplicationDbContext> DbContext
             .ToListAsync();
     }
 
+    public async Task<List<Cotizacion>> ListarPorUsuario(string correoUsuario)
+    {
+        await using var contexto = await DbContext.CreateDbContextAsync();
+        return await contexto.Cotizacion
+            .Include(c => c.Producto)
+            .Where(c => c.Correo == correoUsuario)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
     public async Task<int> ContarCotizaciones()
     {
         await using var contexto = await DbContext.CreateDbContextAsync();
         return await contexto.Cotizacion
-            .CountAsync(c => !c.EstaResuelto); 
+            .CountAsync(c => !c.EstaResuelto);
     }
-
 
     public async Task<Cotizacion?> Buscar(int id)
     {
@@ -45,6 +54,4 @@ public class CotizacionService(IDbContextFactory<ApplicationDbContext> DbContext
         contexto.Cotizacion.Update(cotizacion);
         return await contexto.SaveChangesAsync() > 0;
     }
-   
-
 }

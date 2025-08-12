@@ -99,7 +99,7 @@
 
     <div class="mt-4">
         <button type="submit" class="btn btn-primary">Guardar</button>
-        <a href="/admin/productos" class="btn btn-secondary ms-2">Cancelar</a>
+        <a href="/admin/home" class="btn btn-secondary ms-2">Cancelar</a>
     </div>
 </EditForm>
 
@@ -166,7 +166,7 @@
             if (guardado)
             {
                 ToastService.ShowSuccess("Producto guardado correctamente.");
-                NavigationManager.NavigateTo("/admin/productos");
+                NavigationManager.NavigateTo("/admin/home");
             }
             else
             {

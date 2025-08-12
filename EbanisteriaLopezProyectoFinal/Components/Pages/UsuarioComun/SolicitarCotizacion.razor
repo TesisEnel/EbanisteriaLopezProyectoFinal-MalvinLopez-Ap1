@@ -6,6 +6,7 @@
 @inject ProductoService ProductoService
 @inject NavigationManager NavigationManager
 @inject IToastService ToastService
+@inject AuthenticationStateProvider AuthStateProvider
 
 @rendermode InteractiveServer
 
@@ -36,7 +37,8 @@
 
             <div class="mb-3">
                 <label class="form-label">Correo Electrónico</label>
-                <InputText class="form-control" @bind-value="cotizacion.Correo" />
+                <!-- Campo solo lectura -->
+                <InputText class="form-control" @bind-value="cotizacion.Correo" readonly />
             </div>
 
             <div class="mb-3">
@@ -52,7 +54,7 @@
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a href="/admin/cotizaciones" class="btn btn-secondary ms-2">Cancelar</a>
+                <a href="/store" class="btn btn-secondary ms-2">Cancelar</a>
             </div>
         </div>
 
@@ -86,6 +88,14 @@
             cotizacion.ProductoId = productos.First().ProductoId;
         }
 
+        // Obtener correo usuario autenticado
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var usuario = authState.User;
+        if (usuario.Identity is not null && usuario.Identity.IsAuthenticated)
+        {
+            cotizacion.Correo = usuario.Identity.Name ?? "";
+        }
+
         await ActualizarImagen();
     }
 
@@ -100,7 +110,7 @@
             if (guardado)
             {
                 ToastService.ShowSuccess("Cotización guardada correctamente.");
-                NavigationManager.NavigateTo("/admin/cotizaciones");
+                NavigationManager.NavigateTo("/store");
             }
             else
             {
@@ -136,5 +146,4 @@
             await ActualizarImagen();
         }
     }
-
 }

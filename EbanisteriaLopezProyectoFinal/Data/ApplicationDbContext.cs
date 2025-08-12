@@ -21,6 +21,7 @@ namespace EbanisteriaLopezProyectoFinal.Data
         public DbSet<Venta> Ventas { get; set; }
         public DbSet<Servicio> Servicio { get; set; }
         public DbSet<VentaItem> VentaItems { get; set; }
+        public DbSet<CarritoItemDb> CarritoItems { get; set; }
 
 
 
